@@ -128,5 +128,20 @@
       </p>
     </section>
   </main>
+<script>
+  const button = document.getElementById("build-button");
+  const description = document.getElementById("set-description");
+
+  button.addEventListener("click", function () {
+    const request = description.value.trim();
+
+    if (!request) {
+      alert("Tell me what kind of set you want to build first.");
+      return;
+    }
+
+    alert("Your set request: " + request);
+  });
+</script>  
 </body>
 </html>
