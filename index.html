@@ -1,29 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DJ Set Planner</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0b0f;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .logo {
+      font-size: 14px;
+      color: #a6a6b0;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin: 0 0 12px;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: #b5b5c0;
+      margin-bottom: 36px;
+    }
+
+    .card {
+      background: #16161d;
+      border: 1px solid #2a2a35;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    label {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 1px solid #3a3a47;
+      background: #0f0f14;
+      color: white;
+      padding: 16px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #8b5cf6;
+    }
+
+    button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    .hint {
+      margin-top: 16px;
+      color: #777785;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>DJ Set Planner</h1>
-  <h2>Build better sets.</h2>
+  <main class="app">
+    <div class="logo">DJ Set Planner</div>
 
-  <p>Describe the set you want to play and we'll help you plan it.</p>
+    <h1>Build better sets.</h1>
 
-  <label for="set-description">What are you playing?</label>
-  <br><br>
+    <p class="subtitle">
+      Describe the vibe, length, genre, BPM, and energy you want.
+    </p>
 
-  <textarea
-    id="set-description"
-    rows="6"
-    cols="50"
-    placeholder="Example: 60-minute late-night riddim set. Start around 145 BPM and build toward an aggressive finish."
-  ></textarea>
+    <section class="card">
+      <label for="set-description">What are you playing?</label>
 
-  <br><br>
+      <textarea
+        id="set-description"
+        placeholder="Example: 60-minute late-night riddim set. Start around 145 BPM, keep the energy aggressive, and build toward a huge final 15 minutes."
+      ></textarea>
 
-  <button>Build My Set</button>
+      <button id="build-button">Build My Set</button>
+
+      <p class="hint">
+        Next, we'll make this button generate an actual set plan instead of just being a demo.
+      </p>
+    </section>
+  </main>
 </body>
 </html>
