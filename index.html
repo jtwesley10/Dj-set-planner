@@ -38,10 +38,7 @@
       margin: 0 0 12px;
     }
 
-    h2 {
-      margin-top: 0;
-    }
-
+    h2,
     h3 {
       margin-top: 0;
     }
@@ -116,10 +113,10 @@
 
     button {
       width: 100%;
-      padding: 16px;
+      padding: 15px;
       border: none;
       border-radius: 12px;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
       background: linear-gradient(135deg, #7c3aed, #2563eb);
@@ -128,6 +125,20 @@
 
     button:hover {
       opacity: 0.92;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .secondary-button {
+      background: #24242e;
+      border: 1px solid #3a3a47;
+    }
+
+    .export-button {
+      background: linear-gradient(135deg, #2563eb, #0891b2);
     }
 
     .hint {
@@ -181,6 +192,14 @@
     .summary-value {
       font-size: 17px;
       font-weight: bold;
+    }
+
+    .exclusion-breakdown {
+      margin-top: -10px;
+      margin-bottom: 20px;
+      color: #858591;
+      font-size: 13px;
+      line-height: 1.6;
     }
 
     .filter-box {
@@ -245,6 +264,7 @@
     .library-track-details {
       color: #858591;
       font-size: 13px;
+      line-height: 1.4;
     }
 
     .excluded {
@@ -264,11 +284,6 @@
     .pill.good {
       border-color: #3b7d5b;
       color: #8ed0ab;
-    }
-
-    .pill.warning {
-      border-color: #8c6a35;
-      color: #e2bb75;
     }
 
     .set-section {
@@ -293,6 +308,16 @@
       margin-top: 12px;
     }
 
+    .track-row.locked {
+      border-color: #7c3aed;
+    }
+
+    .track-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
     .track-number {
       color: #8b5cf6;
       font-size: 12px;
@@ -315,6 +340,26 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+    }
+
+    .track-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .track-actions button {
+      width: auto;
+      padding: 9px 13px;
+      font-size: 13px;
+      border-radius: 9px;
+      margin: 0;
+    }
+
+    .timing {
+      color: #777785;
+      font-size: 13px;
+      white-space: nowrap;
     }
 
     .transition {
@@ -352,13 +397,18 @@
       line-height: 1.5;
     }
 
-    .empty-message {
-      background: #0f0f14;
-      border: 1px dashed #3a3a47;
-      padding: 20px;
-      border-radius: 12px;
-      color: #a7a7b2;
-      line-height: 1.6;
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .export-note {
+      color: #777785;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 12px;
     }
 
     .small-note {
@@ -372,7 +422,9 @@
         font-size: 38px;
       }
 
-      .form-grid {
+      .form-grid,
+      .summary-grid,
+      .result-actions {
         grid-template-columns: 1fr;
       }
 
@@ -380,16 +432,25 @@
         grid-column: auto;
       }
 
-      .summary-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
       .library-track {
         grid-template-columns: 34px 1fr;
       }
 
-      .library-track .pill {
+      .library-track > .pill {
         display: none;
+      }
+
+      .track-top {
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .track-actions {
+        flex-direction: column;
+      }
+
+      .track-actions button {
+        width: 100%;
       }
 
       .card {
@@ -408,9 +469,12 @@
   <h1>Build better sets.</h1>
 
   <p class="subtitle">
-    Turn your Rekordbox library into a playable set with BPM flow,
-    harmonic compatibility, energy progression, and transition ideas.
+    Turn your Rekordbox library into an intelligently ordered DJ set with BPM flow,
+    harmonic compatibility, energy progression, and transition guidance.
   </p>
+
+
+  <!-- ================= LIBRARY ================= -->
 
   <section class="card">
 
@@ -454,6 +518,12 @@
 
       </div>
 
+      <div
+        id="exclusion-breakdown"
+        class="exclusion-breakdown"
+      ></div>
+
+
       <div class="filter-box">
 
         <div class="form-group">
@@ -470,6 +540,7 @@
 
         </div>
 
+
         <div class="checkbox-row">
 
           <input
@@ -483,6 +554,7 @@
           </label>
 
         </div>
+
 
         <div class="checkbox-row">
 
@@ -498,7 +570,23 @@
 
         </div>
 
+
+        <div class="checkbox-row">
+
+          <input
+            type="checkbox"
+            id="filter-duplicates"
+            checked
+          />
+
+          <label for="filter-duplicates">
+            Exclude duplicate tracks with the same artist and title
+          </label>
+
+        </div>
+
       </div>
+
 
       <div class="library-manager">
 
@@ -529,6 +617,9 @@
 
   </section>
 
+
+  <!-- ================= SET BRIEF ================= -->
+
   <section class="card">
 
     <h2>2. Create Your Set Brief</h2>
@@ -536,7 +627,10 @@
     <div class="form-grid">
 
       <div class="form-group">
-        <label for="genre">Genre</label>
+
+        <label for="genre">
+          Genre
+        </label>
 
         <select id="genre">
           <option>House</option>
@@ -547,10 +641,15 @@
           <option>Drum & Bass</option>
           <option>Open Format</option>
         </select>
+
       </div>
 
+
       <div class="form-group">
-        <label for="length">Set Length</label>
+
+        <label for="length">
+          Set Length
+        </label>
 
         <select id="length">
           <option value="30">30 minutes</option>
@@ -558,10 +657,15 @@
           <option value="90">90 minutes</option>
           <option value="120">120 minutes</option>
         </select>
+
       </div>
 
+
       <div class="form-group">
-        <label for="bpm">Starting BPM</label>
+
+        <label for="bpm">
+          Starting BPM
+        </label>
 
         <input
           id="bpm"
@@ -570,10 +674,15 @@
           min="60"
           max="200"
         />
+
       </div>
 
+
       <div class="form-group">
-        <label for="energy">Energy</label>
+
+        <label for="energy">
+          Energy
+        </label>
 
         <select id="energy">
           <option>Chill</option>
@@ -581,10 +690,15 @@
           <option selected>High</option>
           <option>Aggressive</option>
         </select>
+
       </div>
 
+
       <div class="form-group full-width">
-        <label for="venue">Venue / Setting</label>
+
+        <label for="venue">
+          Venue / Setting
+        </label>
 
         <select id="venue">
           <option>Club</option>
@@ -595,7 +709,9 @@
           <option>After Party</option>
           <option>Other</option>
         </select>
+
       </div>
+
 
       <div class="form-group full-width">
 
@@ -605,12 +721,13 @@
 
         <textarea
           id="instructions"
-          placeholder="Example: Start heavy, leave room to build, give me a reset around 40 minutes, then finish with the hardest tracks."
+          placeholder="Example: Start heavy but save my biggest tracks for the last 20 minutes. Give me a short reset around the middle."
         ></textarea>
 
       </div>
 
     </div>
+
 
     <button
       id="build-button"
@@ -623,11 +740,26 @@
 
 </main>
 
+
 <script>
+
+/* =====================================================
+   APP STATE
+===================================================== */
 
 let fullLibrary = [];
 let playlists = [];
 let manuallyExcluded = new Set();
+
+let currentSet = [];
+let currentSettings = null;
+let lockedPositions = new Set();
+let generationNumber = 0;
+
+
+/* =====================================================
+   SAFE HTML
+===================================================== */
 
 function escapeHTML(value) {
 
@@ -641,52 +773,84 @@ function escapeHTML(value) {
 }
 
 
-/* ==========================
+function escapeXML(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("'", "&apos;");
+
+}
+
+
+/* =====================================================
    XML IMPORT
-========================== */
+===================================================== */
 
 document
   .getElementById("library-file")
-  .addEventListener("change", handleLibraryUpload);
+  .addEventListener(
+    "change",
+    handleLibraryUpload
+  );
 
 
 function handleLibraryUpload(event) {
 
-  const file = event.target.files[0];
+  const file =
+    event.target.files[0];
 
   if (!file) return;
 
-  const reader = new FileReader();
+  const reader =
+    new FileReader();
 
-  reader.onload = function(e) {
+  reader.onload =
+    function(e) {
 
-    try {
+      try {
 
-      parseRekordboxXML(e.target.result);
+        parseRekordboxXML(
+          e.target.result
+        );
 
-      showLibraryLoaded(file.name);
+        manuallyExcluded.clear();
+        lockedPositions.clear();
+        currentSet = [];
 
-    }
+        showLibraryLoaded(
+          file.name
+        );
 
-    catch(error) {
+      }
 
-      const status =
-        document.getElementById("library-status");
+      catch(error) {
 
-      status.className =
-        "status error";
+        const status =
+          document.getElementById(
+            "library-status"
+          );
 
-      status.textContent =
-        error.message;
+        status.className =
+          "status error";
 
-    }
+        status.textContent =
+          error.message;
 
-  };
+      }
+
+    };
 
   reader.readAsText(file);
 
 }
 
+
+/* =====================================================
+   PARSE REKORDBOX XML
+===================================================== */
 
 function parseRekordboxXML(text) {
 
@@ -699,6 +863,7 @@ function parseRekordboxXML(text) {
       "text/xml"
     );
 
+
   if (
     xml.querySelector("parsererror")
   ) {
@@ -709,12 +874,14 @@ function parseRekordboxXML(text) {
 
   }
 
+
   const xmlTracks =
     Array.from(
       xml.querySelectorAll(
         "COLLECTION > TRACK"
       )
     );
+
 
   if (!xmlTracks.length) {
 
@@ -724,80 +891,145 @@ function parseRekordboxXML(text) {
 
   }
 
+
   fullLibrary =
-    xmlTracks.map(function(track) {
+    xmlTracks.map(
+      function(track) {
 
-      return {
+        return {
 
-        id:
-          track.getAttribute("TrackID")
-          || crypto.randomUUID(),
+          id:
+            track.getAttribute(
+              "TrackID"
+            )
+            ||
+            crypto.randomUUID(),
 
-        title:
-          track.getAttribute("Name")
-          || "Unknown Track",
+          title:
+            track.getAttribute(
+              "Name"
+            )
+            ||
+            "Unknown Track",
 
-        artist:
-          track.getAttribute("Artist")
-          || "Unknown Artist",
+          artist:
+            track.getAttribute(
+              "Artist"
+            )
+            ||
+            "Unknown Artist",
 
-        bpm:
-          Number(
-            track.getAttribute("AverageBpm")
-          ) || 0,
+          bpm:
+            Number(
+              track.getAttribute(
+                "AverageBpm"
+              )
+            )
+            ||
+            0,
 
-        key:
-          track.getAttribute("Tonality")
-          || "",
+          key:
+            track.getAttribute(
+              "Tonality"
+            )
+            ||
+            "",
 
-        genre:
-          track.getAttribute("Genre")
-          || "",
+          genre:
+            track.getAttribute(
+              "Genre"
+            )
+            ||
+            "",
 
-        rating:
-          Number(
-            track.getAttribute("Rating")
-          ) || 0,
+          rating:
+            Number(
+              track.getAttribute(
+                "Rating"
+              )
+            )
+            ||
+            0,
 
-        location:
-          track.getAttribute("Location")
-          || ""
+          location:
+            track.getAttribute(
+              "Location"
+            )
+            ||
+            "",
 
-      };
+          kind:
+            track.getAttribute(
+              "Kind"
+            )
+            ||
+            "",
 
-    });
+          totalTime:
+            Number(
+              track.getAttribute(
+                "TotalTime"
+              )
+            )
+            ||
+            0,
+
+          comments:
+            track.getAttribute(
+              "Comments"
+            )
+            ||
+            ""
+
+        };
+
+      }
+    );
+
 
   playlists = [];
 
+
   const playlistRoot =
-    xml.querySelector("PLAYLISTS");
+    xml.querySelector(
+      "PLAYLISTS"
+    );
+
 
   if (playlistRoot) {
 
-    Array.from(
-      playlistRoot.children
-    ).forEach(
-      node =>
-        parsePlaylistNode(
-          node,
-          ""
-        )
-    );
+    Array
+      .from(
+        playlistRoot.children
+      )
+      .forEach(
+        node =>
+          parsePlaylistNode(
+            node,
+            ""
+          )
+      );
 
   }
 
 }
 
 
-/* ==========================
-   PLAYLISTS
-========================== */
+/* =====================================================
+   PLAYLIST PARSING
+===================================================== */
 
 function cleanPlaylistPath(path) {
 
   return path
-    .replace(/^ROOT\s*\/\s*/i, "")
-    .replace(/^ROOT$/i, "")
+    .replace(
+      /^ROOT\s*\/\s*/i,
+      ""
+    )
+    .replace(
+      /^ROOT$/i,
+      ""
+    )
     .trim();
 
 }
@@ -812,28 +1044,45 @@ function parsePlaylistNode(
     node.tagName !== "NODE"
   ) return;
 
+
   const name =
-    node.getAttribute("Name")
-    || "Unnamed";
+    node.getAttribute(
+      "Name"
+    )
+    ||
+    "Unnamed";
+
 
   const type =
-    node.getAttribute("Type");
+    node.getAttribute(
+      "Type"
+    );
+
 
   let path =
     parentPath
-      ? parentPath + " / " + name
+      ? parentPath
+        + " / "
+        + name
       : name;
+
 
   path =
     cleanPlaylistPath(path);
 
+
   const trackNodes =
-    Array.from(
-      node.children
-    ).filter(
-      child =>
-        child.tagName === "TRACK"
-    );
+    Array
+      .from(
+        node.children
+      )
+      .filter(
+        child =>
+          child.tagName
+          ===
+          "TRACK"
+      );
+
 
   if (
     type === "1"
@@ -845,9 +1094,12 @@ function parsePlaylistNode(
       trackNodes
         .map(
           track =>
-            track.getAttribute("Key")
+            track.getAttribute(
+              "Key"
+            )
         )
         .filter(Boolean);
+
 
     if (
       cleanPlaylistPath(path)
@@ -856,9 +1108,12 @@ function parsePlaylistNode(
       playlists.push({
 
         name:
-          cleanPlaylistPath(path),
+          cleanPlaylistPath(
+            path
+          ),
 
-        trackIds
+        trackIds:
+          trackIds
 
       });
 
@@ -866,12 +1121,16 @@ function parsePlaylistNode(
 
   }
 
-  Array.from(
-    node.children
-  )
+
+  Array
+    .from(
+      node.children
+    )
     .filter(
       child =>
-        child.tagName === "NODE"
+        child.tagName
+        ===
+        "NODE"
     )
     .forEach(
       child =>
@@ -884,20 +1143,60 @@ function parsePlaylistNode(
 }
 
 
-/* ==========================
-   FILTERING
-========================== */
+/* =====================================================
+   DUPLICATES
+===================================================== */
+
+function normalizeDuplicateText(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+    .toLowerCase()
+    .trim()
+    .replace(
+      /\s+/g,
+      " "
+    );
+
+}
+
+
+function duplicateKey(track) {
+
+  return (
+    normalizeDuplicateText(
+      track.artist
+    )
+    +
+    "|||"
+    +
+    normalizeDuplicateText(
+      track.title
+    )
+  );
+
+}
+
+
+/* =====================================================
+   SAMPLE DETECTION
+===================================================== */
 
 function isLikelySample(track) {
 
   const text =
     (
-      track.title +
-      " " +
-      track.artist +
-      " " +
-      track.location
-    ).toLowerCase();
+      track.title
+      + " "
+      + track.artist
+      + " "
+      + track.location
+    )
+    .toLowerCase();
+
 
   const suspicious = [
 
@@ -915,13 +1214,20 @@ function isLikelySample(track) {
 
   ];
 
+
   return suspicious.some(
     keyword =>
-      text.includes(keyword)
+      text.includes(
+        keyword
+      )
   );
 
 }
 
+
+/* =====================================================
+   SELECTED PLAYLIST
+===================================================== */
 
 function getSelectedSourceTracks() {
 
@@ -932,42 +1238,58 @@ function getSelectedSourceTracks() {
       )
       .value;
 
+
   if (
     selected === "ALL"
   ) {
 
-    return [...fullLibrary];
+    return [
+      ...fullLibrary
+    ];
 
   }
+
 
   const playlist =
     playlists[
       Number(selected)
     ];
 
+
   if (!playlist) {
 
-    return [...fullLibrary];
+    return [
+      ...fullLibrary
+    ];
 
   }
+
 
   const ids =
     new Set(
       playlist.trackIds
     );
 
+
   return fullLibrary.filter(
     track =>
-      ids.has(track.id)
+      ids.has(
+        track.id
+      )
   );
 
 }
 
 
-function getUsableTracks() {
+/* =====================================================
+   EXCLUSIONS
+===================================================== */
 
-  let tracks =
+function getFilteredLibraryData() {
+
+  const sourceTracks =
     getSelectedSourceTracks();
+
 
   const removeSamples =
     document
@@ -976,6 +1298,7 @@ function getUsableTracks() {
       )
       .checked;
 
+
   const removeMissing =
     document
       .getElementById(
@@ -983,40 +1306,140 @@ function getUsableTracks() {
       )
       .checked;
 
-  return tracks.filter(
+
+  const removeDuplicates =
+    document
+      .getElementById(
+        "filter-duplicates"
+      )
+      .checked;
+
+
+  const seenDuplicates =
+    new Set();
+
+
+  const usable = [];
+
+
+  const stats = {
+
+    samples: 0,
+    missing: 0,
+    duplicates: 0,
+    manual: 0
+
+  };
+
+
+  sourceTracks.forEach(
     function(track) {
 
       if (
         manuallyExcluded.has(
           track.id
         )
-      ) return false;
+      ) {
+
+        stats.manual++;
+
+        return;
+
+      }
+
 
       if (
         removeSamples
         &&
-        isLikelySample(track)
-      ) return false;
+        isLikelySample(
+          track
+        )
+      ) {
+
+        stats.samples++;
+
+        return;
+
+      }
+
 
       if (
         removeMissing
         &&
         !track.location
-      ) return false;
+      ) {
 
-      return true;
+        stats.missing++;
+
+        return;
+
+      }
+
+
+      if (
+        removeDuplicates
+      ) {
+
+        const key =
+          duplicateKey(
+            track
+          );
+
+
+        if (
+          seenDuplicates.has(
+            key
+          )
+        ) {
+
+          stats.duplicates++;
+
+          return;
+
+        }
+
+
+        seenDuplicates.add(
+          key
+        );
+
+      }
+
+
+      usable.push(
+        track
+      );
 
     }
   );
 
+
+  return {
+
+    sourceTracks,
+    usable,
+    stats
+
+  };
+
 }
 
 
-/* ==========================
-   LIBRARY UI
-========================== */
+function getUsableTracks() {
 
-function showLibraryLoaded(filename) {
+  return getFilteredLibraryData()
+    .usable;
+
+}
+
+
+/* =====================================================
+   LIBRARY DISPLAY
+===================================================== */
+
+function showLibraryLoaded(
+  filename
+) {
 
   const status =
     document
@@ -1024,12 +1447,16 @@ function showLibraryLoaded(filename) {
         "library-status"
       );
 
+
   status.className =
     "status success";
 
+
   status.textContent =
     "Rekordbox library loaded: "
-    + filename;
+    +
+    filename;
+
 
   document
     .getElementById(
@@ -1037,6 +1464,7 @@ function showLibraryLoaded(filename) {
     )
     .style.display =
       "block";
+
 
   buildPlaylistMenu();
 
@@ -1053,28 +1481,41 @@ function buildPlaylistMenu() {
         "playlist-select"
       );
 
+
   select.innerHTML = `
+
     <option value="ALL">
       Entire Collection
     </option>
+
   `;
 
+
   playlists.forEach(
-    function(playlist,index) {
+    function(
+      playlist,
+      index
+    ) {
 
       const option =
         document.createElement(
           "option"
         );
 
+
       option.value =
         index;
 
+
       option.textContent =
         playlist.name
-        + " ("
-        + playlist.trackIds.length
-        + ")";
+        +
+        " ("
+        +
+        playlist.trackIds.length
+        +
+        ")";
+
 
       select.appendChild(
         option
@@ -1088,34 +1529,39 @@ function buildPlaylistMenu() {
 
 function refreshLibraryDisplay() {
 
-  const sourceTracks =
-    getSelectedSourceTracks();
+  const data =
+    getFilteredLibraryData();
 
-  const usable =
-    getUsableTracks();
+
+  const totalExcluded =
+    data.sourceTracks.length
+    -
+    data.usable.length;
+
 
   document
     .getElementById(
       "collection-count"
     )
     .textContent =
-      sourceTracks.length;
+      data.sourceTracks.length;
+
 
   document
     .getElementById(
       "available-count"
     )
     .textContent =
-      usable.length;
+      data.usable.length;
+
 
   document
     .getElementById(
       "excluded-count"
     )
     .textContent =
-      sourceTracks.length
-      -
-      usable.length;
+      totalExcluded;
+
 
   document
     .getElementById(
@@ -1124,10 +1570,40 @@ function refreshLibraryDisplay() {
     .textContent =
       playlists.length;
 
+
+  document
+    .getElementById(
+      "exclusion-breakdown"
+    )
+    .textContent =
+
+      "Excluded: "
+      +
+      data.stats.samples
+      +
+      " samples · "
+      +
+      data.stats.duplicates
+      +
+      " duplicates · "
+      +
+      data.stats.missing
+      +
+      " missing files · "
+      +
+      data.stats.manual
+      +
+      " manually excluded";
+
+
   renderLibraryManager();
 
 }
 
+
+/* =====================================================
+   LIBRARY MANAGER
+===================================================== */
 
 function renderLibraryManager() {
 
@@ -1140,27 +1616,42 @@ function renderLibraryManager() {
       .trim()
       .toLowerCase();
 
+
   let tracks =
     getSelectedSourceTracks();
+
 
   if (search) {
 
     tracks =
       tracks.filter(
         track =>
+
           track.title
             .toLowerCase()
-            .includes(search)
+            .includes(
+              search
+            )
+
           ||
+
           track.artist
             .toLowerCase()
-            .includes(search)
+            .includes(
+              search
+            )
+
       );
 
   }
 
+
   tracks =
-    tracks.slice(0,200);
+    tracks.slice(
+      0,
+      200
+    );
+
 
   const list =
     document
@@ -1168,119 +1659,139 @@ function renderLibraryManager() {
         "library-list"
       );
 
-  if (!tracks.length) {
+
+  if (
+    !tracks.length
+  ) {
 
     list.innerHTML = `
+
       <div class="empty-message">
         No matching tracks.
       </div>
+
     `;
 
     return;
 
   }
 
+
+  const duplicateCounts =
+    {};
+
+
+  tracks.forEach(
+    track => {
+
+      const key =
+        duplicateKey(
+          track
+        );
+
+      duplicateCounts[key] =
+        (
+          duplicateCounts[key]
+          ||
+          0
+        )
+        +
+        1;
+
+    }
+  );
+
+
   list.innerHTML =
-    tracks.map(
-      function(track) {
+    tracks
+      .map(
+        function(track) {
 
-        const automaticSample =
-          document
-            .getElementById(
-              "filter-samples"
-            )
-            .checked
-          &&
-          isLikelySample(track);
+          const isDuplicate =
+            duplicateCounts[
+              duplicateKey(
+                track
+              )
+            ]
+            >
+            1;
 
-        const missing =
-          document
-            .getElementById(
-              "filter-missing"
-            )
-            .checked
-          &&
-          !track.location;
 
-        const excluded =
-          manuallyExcluded.has(track.id)
-          ||
-          automaticSample
-          ||
-          missing;
+          return `
 
-        return `
+            <div class="library-track">
 
-          <div
-            class="library-track
-            ${excluded ? "excluded" : ""}"
-          >
+              <input
+                type="checkbox"
+                class="track-checkbox"
+                data-id="${escapeHTML(track.id)}"
+                ${
+                  manuallyExcluded.has(
+                    track.id
+                  )
+                    ? ""
+                    : "checked"
+                }
+              />
 
-            <input
-              type="checkbox"
-              class="track-checkbox"
-              data-id="${escapeHTML(track.id)}"
-              ${
-                manuallyExcluded.has(track.id)
-                  ? ""
-                  : "checked"
-              }
-            />
+              <div>
 
-            <div>
+                <div class="library-track-title">
+                  ${escapeHTML(track.title)}
+                </div>
 
-              <div class="library-track-title">
-                ${escapeHTML(track.title)}
+                <div class="library-track-details">
+
+                  ${escapeHTML(track.artist)}
+
+                  ${
+                    track.bpm
+                      ? " • "
+                        +
+                        track.bpm
+                        +
+                        " BPM"
+                      : ""
+                  }
+
+                  ${
+                    track.key
+                      ? " • "
+                        +
+                        escapeHTML(
+                          track.key
+                        )
+                      : ""
+                  }
+
+                  ${
+                    isDuplicate
+                      ? " • DUPLICATE"
+                      : ""
+                  }
+
+                </div>
+
               </div>
 
-              <div class="library-track-details">
+              <span class="pill">
 
-                ${escapeHTML(track.artist)}
+                ${escapeHTML(
+                  track.genre
+                  ||
+                  "No genre"
+                )}
 
-                ${
-                  track.bpm
-                    ? " • "
-                      + track.bpm
-                      + " BPM"
-                    : ""
-                }
-
-                ${
-                  track.key
-                    ? " • "
-                      + escapeHTML(track.key)
-                    : ""
-                }
-
-                ${
-                  automaticSample
-                    ? " • AUTO-EXCLUDED SAMPLE"
-                    : ""
-                }
-
-                ${
-                  missing
-                    ? " • FILE LOCATION MISSING"
-                    : ""
-                }
-
-              </div>
+              </span>
 
             </div>
 
-            <span class="pill">
-              ${escapeHTML(
-                track.genre
-                || "No genre"
-              )}
-            </span>
+          `;
 
-          </div>
+        }
+      )
+      .join("");
 
-        `;
-
-      }
-    ).join("");
 
   document
     .querySelectorAll(
@@ -1296,6 +1807,7 @@ function renderLibraryManager() {
 
               const id =
                 this.dataset.id;
+
 
               if (
                 this.checked
@@ -1315,6 +1827,7 @@ function renderLibraryManager() {
 
               }
 
+
               refreshLibraryDisplay();
 
             }
@@ -1326,57 +1839,97 @@ function renderLibraryManager() {
 }
 
 
-/* ==========================
-   KEY / HARMONIC SYSTEM
-========================== */
+/* =====================================================
+   CAMELOT / HARMONIC MIXING
+===================================================== */
 
 const camelotMap = {
 
-  "A♭ Minor": "1A",
-  "G# Minor": "1A",
-  "B Major": "1B",
+  "abm":"1A",
+  "g#m":"1A",
+  "b":"1B",
 
-  "E♭ Minor": "2A",
-  "D# Minor": "2A",
-  "F# Major": "2B",
-  "G♭ Major": "2B",
+  "ebm":"2A",
+  "d#m":"2A",
+  "f#":"2B",
+  "gb":"2B",
 
-  "B♭ Minor": "3A",
-  "A# Minor": "3A",
-  "D♭ Major": "3B",
-  "C# Major": "3B",
+  "bbm":"3A",
+  "a#m":"3A",
+  "db":"3B",
+  "c#":"3B",
 
-  "F Minor": "4A",
-  "A♭ Major": "4B",
-  "G# Major": "4B",
+  "fm":"4A",
+  "ab":"4B",
+  "g#":"4B",
 
-  "C Minor": "5A",
-  "E♭ Major": "5B",
-  "D# Major": "5B",
+  "cm":"5A",
+  "eb":"5B",
+  "d#":"5B",
 
-  "G Minor": "6A",
-  "B♭ Major": "6B",
-  "A# Major": "6B",
+  "gm":"6A",
+  "bb":"6B",
+  "a#":"6B",
 
-  "D Minor": "7A",
-  "F Major": "7B",
+  "dm":"7A",
+  "f":"7B",
 
-  "A Minor": "8A",
-  "C Major": "8B",
+  "am":"8A",
+  "c":"8B",
 
-  "E Minor": "9A",
-  "G Major": "9B",
+  "em":"9A",
+  "g":"9B",
 
-  "B Minor": "10A",
-  "D Major": "10B",
+  "bm":"10A",
+  "d":"10B",
 
-  "F# Minor": "11A",
-  "G♭ Minor": "11A",
-  "A Major": "11B",
+  "f#m":"11A",
+  "gbm":"11A",
+  "a":"11B",
 
-  "C# Minor": "12A",
-  "D♭ Minor": "12A",
-  "E Major": "12B"
+  "c#m":"12A",
+  "dbm":"12A",
+  "e":"12B",
+
+  "a♭ minor":"1A",
+  "g# minor":"1A",
+  "b major":"1B",
+
+  "e♭ minor":"2A",
+  "d# minor":"2A",
+  "f# major":"2B",
+
+  "b♭ minor":"3A",
+  "a# minor":"3A",
+  "d♭ major":"3B",
+  "c# major":"3B",
+
+  "f minor":"4A",
+  "a♭ major":"4B",
+
+  "c minor":"5A",
+  "e♭ major":"5B",
+
+  "g minor":"6A",
+  "b♭ major":"6B",
+
+  "d minor":"7A",
+  "f major":"7B",
+
+  "a minor":"8A",
+  "c major":"8B",
+
+  "e minor":"9A",
+  "g major":"9B",
+
+  "b minor":"10A",
+  "d major":"10B",
+
+  "f# minor":"11A",
+  "a major":"11B",
+
+  "c# minor":"12A",
+  "e major":"12B"
 
 };
 
@@ -1385,21 +1938,31 @@ function normalizeKey(key) {
 
   if (!key) return "";
 
-  const trimmed =
-    key.trim();
+
+  const cleaned =
+    key
+      .trim()
+      .toLowerCase();
+
 
   if (
-    /^[1-9][0-2]?[AB]$/i
-      .test(trimmed)
+    /^(1[0-2]|[1-9])[ab]$/i
+      .test(
+        cleaned
+      )
   ) {
 
-    return trimmed
+    return cleaned
       .toUpperCase();
 
   }
 
-  return camelotMap[trimmed]
-    || "";
+
+  return camelotMap[
+    cleaned
+  ]
+  ||
+  "";
 
 }
 
@@ -1410,30 +1973,60 @@ function camelotCompatibility(
 ) {
 
   const a =
-    normalizeKey(key1);
+    normalizeKey(
+      key1
+    );
+
 
   const b =
-    normalizeKey(key2);
+    normalizeKey(
+      key2
+    );
+
 
   if (
-    !a || !b
-  ) return 0;
+    !a
+    ||
+    !b
+  ) {
+
+    return 0;
+
+  }
+
 
   if (
     a === b
-  ) return 30;
+  ) {
+
+    return 30;
+
+  }
+
 
   const numberA =
-    parseInt(a);
+    parseInt(
+      a
+    );
+
 
   const numberB =
-    parseInt(b);
+    parseInt(
+      b
+    );
+
 
   const letterA =
-    a.slice(-1);
+    a.slice(
+      -1
+    );
+
 
   const letterB =
-    b.slice(-1);
+    b.slice(
+      -1
+    );
+
 
   if (
     numberA === numberB
@@ -1445,15 +2038,18 @@ function camelotCompatibility(
 
   }
 
+
   const next =
     numberA === 12
       ? 1
       : numberA + 1;
 
+
   const previous =
     numberA === 1
       ? 12
       : numberA - 1;
+
 
   if (
     letterA === letterB
@@ -1469,49 +2065,84 @@ function camelotCompatibility(
 
   }
 
+
   return -8;
 
 }
 
 
-/* ==========================
+/* =====================================================
    ENERGY
-========================== */
+===================================================== */
 
-function trackEnergyScore(track) {
+function trackEnergyScore(
+  track
+) {
 
   let score = 5;
 
+
+  const rating =
+    track.rating > 5
+      ? track.rating / 51
+      : track.rating;
+
+
   if (
-    track.rating >= 5
-  ) score += 2;
+    rating >= 5
+  ) {
+
+    score += 2;
+
+  }
 
   else if (
-    track.rating >= 4
-  ) score += 1;
-
-  if (
-    track.bpm >= 140
-  ) score += 1;
-
-  const text =
-    (
-      track.genre
-      + " "
-      + track.title
-    ).toLowerCase();
-
-  if (
-    text.includes("riddim")
-    ||
-    text.includes("dubstep")
-    ||
-    text.includes("bass")
+    rating >= 4
   ) {
 
     score += 1;
 
   }
+
+
+  if (
+    track.bpm >= 140
+  ) {
+
+    score += 1;
+
+  }
+
+
+  const text =
+    (
+      track.genre
+      +
+      " "
+      +
+      track.title
+    )
+    .toLowerCase();
+
+
+  if (
+    text.includes(
+      "riddim"
+    )
+    ||
+    text.includes(
+      "dubstep"
+    )
+    ||
+    text.includes(
+      "bass"
+    )
+  ) {
+
+    score += 1;
+
+  }
+
 
   return Math.min(
     10,
@@ -1532,10 +2163,14 @@ function desiredEnergyAtPosition(
       ? 0
       : position
         /
-        (total - 1);
+        (
+          total - 1
+        );
+
 
   let baseStart = 4;
   let peak = 8;
+
 
   if (
     energy === "Chill"
@@ -1546,6 +2181,7 @@ function desiredEnergyAtPosition(
 
   }
 
+
   if (
     energy === "Building"
   ) {
@@ -1554,6 +2190,7 @@ function desiredEnergyAtPosition(
     peak = 8;
 
   }
+
 
   if (
     energy === "High"
@@ -1564,6 +2201,7 @@ function desiredEnergyAtPosition(
 
   }
 
+
   if (
     energy === "Aggressive"
   ) {
@@ -1573,6 +2211,7 @@ function desiredEnergyAtPosition(
 
   }
 
+
   if (
     progress < 0.60
   ) {
@@ -1580,14 +2219,19 @@ function desiredEnergyAtPosition(
     return baseStart
       +
       (
-        peak - baseStart
+        peak
+        -
+        baseStart
       )
       *
       (
-        progress / 0.60
+        progress
+        /
+        0.60
       );
 
   }
+
 
   if (
     progress < 0.75
@@ -1597,14 +2241,15 @@ function desiredEnergyAtPosition(
 
   }
 
+
   return peak;
 
 }
 
 
-/* ==========================
+/* =====================================================
    TRACK SCORING
-========================== */
+===================================================== */
 
 function scoreCandidate(
   track,
@@ -1613,24 +2258,26 @@ function scoreCandidate(
   desiredEnergy,
   genre,
   position,
-  totalTracks
+  totalTracks,
+  randomness = 0
 ) {
 
   let score =
     100;
 
+
   if (
     track.bpm
   ) {
 
-    const bpmDifference =
-      Math.abs(
-        track.bpm -
-        targetBpm
-      );
-
     score -=
-      bpmDifference * 6;
+      Math.abs(
+        track.bpm
+        -
+        targetBpm
+      )
+      *
+      6;
 
   }
 
@@ -1640,12 +2287,16 @@ function scoreCandidate(
 
   }
 
+
   const requested =
-    genre.toLowerCase();
+    genre
+      .toLowerCase();
+
 
   const trackGenre =
     track.genre
       .toLowerCase();
+
 
   if (
     requested !==
@@ -1680,8 +2331,12 @@ function scoreCandidate(
 
   }
 
+
   const actualEnergy =
-    trackEnergyScore(track);
+    trackEnergyScore(
+      track
+    );
+
 
   score -=
     Math.abs(
@@ -1689,7 +2344,9 @@ function scoreCandidate(
       -
       desiredEnergy
     )
-    * 5;
+    *
+    5;
+
 
   if (
     previousTrack
@@ -1700,6 +2357,7 @@ function scoreCandidate(
         previousTrack.key,
         track.key
       );
+
 
     if (
       previousTrack.bpm
@@ -1713,6 +2371,7 @@ function scoreCandidate(
           -
           track.bpm
         );
+
 
       if (
         jump <= 2
@@ -1742,31 +2401,54 @@ function scoreCandidate(
 
   }
 
+
   const progress =
     totalTracks <= 1
       ? 0
       : position
         /
-        (totalTracks - 1);
+        (
+          totalTracks - 1
+        );
+
+
+  const rating =
+    track.rating > 5
+      ? track.rating / 51
+      : track.rating;
+
 
   if (
     progress > 0.78
     &&
-    track.rating >= 4
+    rating >= 4
   ) {
 
     score += 18;
 
   }
 
+
+  if (
+    randomness > 0
+  ) {
+
+    score +=
+      Math.random()
+      *
+      randomness;
+
+  }
+
+
   return score;
 
 }
 
 
-/* ==========================
-   TRANSITIONS
-========================== */
+/* =====================================================
+   TRANSITION SUGGESTIONS
+===================================================== */
 
 function getTransitionSuggestion(
   current,
@@ -1775,15 +2457,25 @@ function getTransitionSuggestion(
 ) {
 
   if (
-    !current || !next
-  ) return "";
+    !current
+    ||
+    !next
+  ) {
+
+    return "";
+
+  }
+
 
   const bpmDiff =
     current.bpm
     &&
     next.bpm
-      ? next.bpm - current.bpm
+      ? next.bpm
+        -
+        current.bpm
       : 0;
+
 
   const compatibility =
     camelotCompatibility(
@@ -1791,8 +2483,10 @@ function getTransitionSuggestion(
       next.key
     );
 
+
   let technique =
     "Use a standard phrased transition.";
+
 
   if (
     genre === "Riddim"
@@ -1801,7 +2495,11 @@ function getTransitionSuggestion(
   ) {
 
     if (
-      Math.abs(bpmDiff) <= 2
+      Math.abs(
+        bpmDiff
+      )
+      <=
+      2
     ) {
 
       technique =
@@ -1819,11 +2517,17 @@ function getTransitionSuggestion(
   }
 
   else if (
-    genre.includes("House")
+    genre.includes(
+      "House"
+    )
   ) {
 
     if (
-      Math.abs(bpmDiff) <= 2
+      Math.abs(
+        bpmDiff
+      )
+      <=
+      2
     ) {
 
       technique =
@@ -1834,14 +2538,16 @@ function getTransitionSuggestion(
     else {
 
       technique =
-        "Make the BPM adjustment during a breakdown or low-energy phrase.";
+        "Make the BPM adjustment during a breakdown or lower-energy phrase.";
 
     }
 
   }
 
+
   let harmonic =
     "";
+
 
   if (
     compatibility >= 22
@@ -1861,8 +2567,10 @@ function getTransitionSuggestion(
 
   }
 
+
   let tempo =
     "";
+
 
   if (
     current.bpm
@@ -1875,7 +2583,13 @@ function getTransitionSuggestion(
     ) {
 
       tempo =
-        ` Increase approximately ${Math.abs(bpmDiff).toFixed(1)} BPM.`;
+        " Increase approximately "
+        +
+        Math.abs(
+          bpmDiff
+        ).toFixed(1)
+        +
+        " BPM.";
 
     }
 
@@ -1884,7 +2598,13 @@ function getTransitionSuggestion(
     ) {
 
       tempo =
-        ` Reduce approximately ${Math.abs(bpmDiff).toFixed(1)} BPM.`;
+        " Reduce approximately "
+        +
+        Math.abs(
+          bpmDiff
+        ).toFixed(1)
+        +
+        " BPM.";
 
     }
 
@@ -1897,16 +2617,137 @@ function getTransitionSuggestion(
 
   }
 
+
   return technique
-    + harmonic
-    + tempo;
+    +
+    harmonic
+    +
+    tempo;
 
 }
 
 
-/* ==========================
+/* =====================================================
+   SET SETTINGS
+===================================================== */
+
+function readSetSettings() {
+
+  return {
+
+    genre:
+      document
+        .getElementById(
+          "genre"
+        )
+        .value,
+
+    length:
+      Number(
+        document
+          .getElementById(
+            "length"
+          )
+          .value
+      ),
+
+    startingBpm:
+      Number(
+        document
+          .getElementById(
+            "bpm"
+          )
+          .value
+      ),
+
+    energy:
+      document
+        .getElementById(
+          "energy"
+        )
+        .value,
+
+    venue:
+      document
+        .getElementById(
+          "venue"
+        )
+        .value,
+
+    instructions:
+      document
+        .getElementById(
+          "instructions"
+        )
+        .value
+        .trim()
+
+  };
+
+}
+
+
+function getEndingBpm(
+  settings
+) {
+
+  let increase = 4;
+
+
+  if (
+    settings.energy
+    ===
+    "Chill"
+  ) {
+
+    increase = 2;
+
+  }
+
+
+  if (
+    settings.energy
+    ===
+    "Building"
+  ) {
+
+    increase = 4;
+
+  }
+
+
+  if (
+    settings.energy
+    ===
+    "High"
+  ) {
+
+    increase = 6;
+
+  }
+
+
+  if (
+    settings.energy
+    ===
+    "Aggressive"
+  ) {
+
+    increase = 8;
+
+  }
+
+
+  return settings.startingBpm
+    +
+    increase;
+
+}
+
+
+/* =====================================================
    BUILD SET
-========================== */
+===================================================== */
 
 document
   .getElementById(
@@ -1914,63 +2755,32 @@ document
   )
   .addEventListener(
     "click",
-    buildSet
+    function() {
+
+      lockedPositions.clear();
+
+      generationNumber = 0;
+
+      buildSet(
+        false
+      );
+
+    }
   );
 
 
-function buildSet() {
+function buildSet(
+  alternateVersion
+) {
 
-  const genre =
-    document
-      .getElementById(
-        "genre"
-      )
-      .value;
+  const settings =
+    readSetSettings();
 
-  const length =
-    Number(
-      document
-        .getElementById(
-          "length"
-        )
-        .value
-    );
-
-  const startingBpm =
-    Number(
-      document
-        .getElementById(
-          "bpm"
-        )
-        .value
-    );
-
-  const energy =
-    document
-      .getElementById(
-        "energy"
-      )
-      .value;
-
-  const venue =
-    document
-      .getElementById(
-        "venue"
-      )
-      .value;
-
-  const instructions =
-    document
-      .getElementById(
-        "instructions"
-      )
-      .value
-      .trim();
 
   if (
-    startingBpm < 60
+    settings.startingBpm < 60
     ||
-    startingBpm > 200
+    settings.startingBpm > 200
   ) {
 
     alert(
@@ -1981,8 +2791,10 @@ function buildSet() {
 
   }
 
+
   const usableLibrary =
     getUsableTracks();
+
 
   if (
     !usableLibrary.length
@@ -1996,45 +2808,83 @@ function buildSet() {
 
   }
 
-  let bpmIncrease = 4;
-
-  if (
-    energy === "Chill"
-  ) bpmIncrease = 2;
-
-  if (
-    energy === "Building"
-  ) bpmIncrease = 4;
-
-  if (
-    energy === "High"
-  ) bpmIncrease = 6;
-
-  if (
-    energy === "Aggressive"
-  ) bpmIncrease = 8;
 
   const endingBpm =
-    startingBpm
-    +
-    bpmIncrease;
+    getEndingBpm(
+      settings
+    );
+
+
+  settings.endingBpm =
+    endingBpm;
+
 
   const estimatedTracks =
     Math.min(
+
       usableLibrary.length,
+
       Math.max(
         6,
         Math.round(
-          length / 4
+          settings.length
+          /
+          4
         )
       )
+
     );
 
+
   const available =
-    [...usableLibrary];
+    usableLibrary.filter(
+      track =>
+
+        !Array
+          .from(
+            lockedPositions
+          )
+          .some(
+            position =>
+              currentSet[
+                position
+              ]
+              &&
+              currentSet[
+                position
+              ].id
+              ===
+              track.id
+          )
+
+    );
+
 
   const selectedTracks =
-    [];
+    new Array(
+      estimatedTracks
+    );
+
+
+  lockedPositions.forEach(
+    position => {
+
+      if (
+        currentSet[position]
+        &&
+        position
+        <
+        estimatedTracks
+      ) {
+
+        selectedTracks[position] =
+          currentSet[position];
+
+      }
+
+    }
+  );
+
 
   for (
     let position = 0;
@@ -2042,57 +2892,143 @@ function buildSet() {
     position++
   ) {
 
+    if (
+      selectedTracks[
+        position
+      ]
+    ) {
+
+      continue;
+
+    }
+
+
+    if (
+      !available.length
+    ) {
+
+      break;
+
+    }
+
+
     const progress =
       estimatedTracks <= 1
         ? 0
         : position
           /
-          (estimatedTracks - 1);
+          (
+            estimatedTracks - 1
+          );
+
 
     const targetBpm =
-      startingBpm
+      settings.startingBpm
       +
       (
         endingBpm
         -
-        startingBpm
+        settings.startingBpm
       )
       *
       progress;
+
 
     const desiredEnergy =
       desiredEnergyAtPosition(
         position,
         estimatedTracks,
-        energy
+        settings.energy
       );
 
+
     const previousTrack =
-      selectedTracks.length
+      position > 0
         ? selectedTracks[
-            selectedTracks.length - 1
+            position - 1
           ]
         : null;
 
-    let bestIndex = 0;
-    let bestScore = -Infinity;
+
+    let bestIndex =
+      0;
+
+
+    let bestScore =
+      -Infinity;
+
 
     available.forEach(
-      function(track,index) {
+      function(
+        track,
+        index
+      ) {
 
-        const score =
+        let score =
           scoreCandidate(
+
             track,
+
             previousTrack,
+
             targetBpm,
+
             desiredEnergy,
-            genre,
+
+            settings.genre,
+
             position,
-            estimatedTracks
+
+            estimatedTracks,
+
+            alternateVersion
+              ? 18
+              : 0
+
           );
 
+
+        const nextLocked =
+          selectedTracks[
+            position + 1
+          ];
+
+
         if (
-          score > bestScore
+          nextLocked
+        ) {
+
+          score +=
+            camelotCompatibility(
+              track.key,
+              nextLocked.key
+            );
+
+
+          if (
+            track.bpm
+            &&
+            nextLocked.bpm
+          ) {
+
+            score -=
+              Math.abs(
+                track.bpm
+                -
+                nextLocked.bpm
+              )
+              *
+              2;
+
+          }
+
+        }
+
+
+        if (
+          score
+          >
+          bestScore
         ) {
 
           bestScore =
@@ -2106,69 +3042,408 @@ function buildSet() {
       }
     );
 
+
     const selected =
       available.splice(
         bestIndex,
         1
       )[0];
 
-    selectedTracks.push({
+
+    selectedTracks[
+      position
+    ] = {
 
       ...selected,
-
-      targetBpm:
-        Math.round(
-          targetBpm
-        ),
 
       energyScore:
         trackEnergyScore(
           selected
-        ),
-
-      plannerScore:
-        Math.round(
-          bestScore
         )
 
-    });
-
-    if (
-      !available.length
-    ) break;
+    };
 
   }
 
-  renderGeneratedSet(
-    selectedTracks,
-    {
-      genre,
-      length,
-      startingBpm,
-      endingBpm,
-      energy,
-      venue,
-      instructions
-    }
-  );
+
+  currentSet =
+    selectedTracks.filter(
+      Boolean
+    );
+
+
+  currentSettings =
+    settings;
+
+
+  generationNumber++;
+
+
+  renderGeneratedSet();
 
 }
 
 
-/* ==========================
-   DISPLAY SET
-========================== */
+/* =====================================================
+   REPLACE A TRACK
+===================================================== */
 
-function renderGeneratedSet(
-  tracks,
-  settings
+function replaceTrack(
+  position
 ) {
+
+  if (
+    lockedPositions.has(
+      position
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const usable =
+    getUsableTracks();
+
+
+  const usedIds =
+    new Set(
+      currentSet.map(
+        track =>
+          track.id
+      )
+    );
+
+
+  const usedDuplicates =
+    new Set(
+      currentSet.map(
+        duplicateKey
+      )
+    );
+
+
+  const duplicateFilter =
+    document
+      .getElementById(
+        "filter-duplicates"
+      )
+      .checked;
+
+
+  let candidates =
+    usable.filter(
+      track => {
+
+        if (
+          usedIds.has(
+            track.id
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          duplicateFilter
+          &&
+          usedDuplicates.has(
+            duplicateKey(
+              track
+            )
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        return true;
+
+      }
+    );
+
+
+  if (
+    !candidates.length
+  ) {
+
+    alert(
+      "No additional matching tracks are available."
+    );
+
+    return;
+
+  }
+
+
+  const previous =
+    position > 0
+      ? currentSet[
+          position - 1
+        ]
+      : null;
+
+
+  const next =
+    position
+    <
+    currentSet.length - 1
+      ? currentSet[
+          position + 1
+        ]
+      : null;
+
+
+  const progress =
+    currentSet.length <= 1
+      ? 0
+      : position
+        /
+        (
+          currentSet.length - 1
+        );
+
+
+  const targetBpm =
+    currentSettings.startingBpm
+    +
+    (
+      currentSettings.endingBpm
+      -
+      currentSettings.startingBpm
+    )
+    *
+    progress;
+
+
+  const desiredEnergy =
+    desiredEnergyAtPosition(
+
+      position,
+
+      currentSet.length,
+
+      currentSettings.energy
+
+    );
+
+
+  candidates =
+    candidates
+      .map(
+        track => {
+
+          let score =
+            scoreCandidate(
+
+              track,
+
+              previous,
+
+              targetBpm,
+
+              desiredEnergy,
+
+              currentSettings.genre,
+
+              position,
+
+              currentSet.length,
+
+              15
+
+            );
+
+
+          if (
+            next
+          ) {
+
+            score +=
+              camelotCompatibility(
+                track.key,
+                next.key
+              );
+
+
+            if (
+              track.bpm
+              &&
+              next.bpm
+            ) {
+
+              score -=
+                Math.abs(
+                  track.bpm
+                  -
+                  next.bpm
+                )
+                *
+                2;
+
+            }
+
+          }
+
+
+          return {
+
+            track,
+            score
+
+          };
+
+        }
+      )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          b.score
+          -
+          a.score
+      );
+
+
+  const replacement =
+    candidates[0]
+      .track;
+
+
+  currentSet[
+    position
+  ] = {
+
+    ...replacement,
+
+    energyScore:
+      trackEnergyScore(
+        replacement
+      )
+
+  };
+
+
+  renderGeneratedSet();
+
+}
+
+
+/* =====================================================
+   LOCK TRACK
+===================================================== */
+
+function toggleLock(
+  position
+) {
+
+  if (
+    lockedPositions.has(
+      position
+    )
+  ) {
+
+    lockedPositions.delete(
+      position
+    );
+
+  }
+
+  else {
+
+    lockedPositions.add(
+      position
+    );
+
+  }
+
+
+  renderGeneratedSet();
+
+}
+
+
+/* =====================================================
+   TIMING
+===================================================== */
+
+function formatSetTime(
+  position
+) {
+
+  if (
+    !currentSet.length
+    ||
+    !currentSettings
+  ) {
+
+    return "~0:00";
+
+  }
+
+
+  const minutes =
+    position
+    *
+    (
+      currentSettings.length
+      /
+      currentSet.length
+    );
+
+
+  const wholeMinutes =
+    Math.floor(
+      minutes
+    );
+
+
+  const seconds =
+    Math.round(
+      (
+        minutes
+        -
+        wholeMinutes
+      )
+      *
+      60
+    );
+
+
+  return "~"
+    +
+    wholeMinutes
+    +
+    ":"
+    +
+    String(
+      seconds
+    ).padStart(
+      2,
+      "0"
+    );
+
+}
+
+
+/* =====================================================
+   RENDER SET
+===================================================== */
+
+function renderGeneratedSet() {
 
   let results =
     document
       .getElementById(
         "set-results"
       );
+
 
   if (!results) {
 
@@ -2177,20 +3452,33 @@ function renderGeneratedSet(
         "section"
       );
 
+
     results.id =
       "set-results";
+
 
     results.className =
       "card";
 
+
     document
-      .querySelector(".app")
-      .appendChild(results);
+      .querySelector(
+        ".app"
+      )
+      .appendChild(
+        results
+      );
 
   }
 
+
+  const tracks =
+    currentSet;
+
+
   const count =
     tracks.length;
+
 
   const openingEnd =
     Math.max(
@@ -2200,6 +3488,7 @@ function renderGeneratedSet(
       )
     );
 
+
   const buildEnd =
     Math.max(
       openingEnd + 1,
@@ -2207,6 +3496,7 @@ function renderGeneratedSet(
         count * 0.45
       )
     );
+
 
   const peakEnd =
     Math.max(
@@ -2216,6 +3506,7 @@ function renderGeneratedSet(
       )
     );
 
+
   const resetEnd =
     Math.max(
       peakEnd + 1,
@@ -2224,49 +3515,81 @@ function renderGeneratedSet(
       )
     );
 
+
   const sections = [
 
     {
-      name: "Opening",
-      start: 0,
-      end: openingEnd,
+      name:
+        "Opening",
+
+      start:
+        0,
+
+      end:
+        openingEnd,
+
       description:
         "Establish the sound and leave room for the set to grow."
     },
 
     {
-      name: "Build",
-      start: openingEnd,
-      end: buildEnd,
+      name:
+        "Build",
+
+      start:
+        openingEnd,
+
+      end:
+        buildEnd,
+
       description:
         "Increase momentum while preserving BPM and harmonic flow."
     },
 
     {
-      name: "First Peak",
-      start: buildEnd,
-      end: peakEnd,
+      name:
+        "First Peak",
+
+      start:
+        buildEnd,
+
+      end:
+        peakEnd,
+
       description:
         "Deliver the first major payoff with stronger selections."
     },
 
     {
-      name: "Reset",
-      start: peakEnd,
-      end: resetEnd,
+      name:
+        "Reset",
+
+      start:
+        peakEnd,
+
+      end:
+        resetEnd,
+
       description:
         "Create contrast and breathing room before the final push."
     },
 
     {
-      name: "Final Peak / Closer",
-      start: resetEnd,
-      end: count,
+      name:
+        "Final Peak / Closer",
+
+      start:
+        resetEnd,
+
+      end:
+        count,
+
       description:
         "Use the strongest remaining tracks and finish decisively."
     }
 
   ];
+
 
   results.innerHTML = `
 
@@ -2274,111 +3597,164 @@ function renderGeneratedSet(
       Your Set Plan
     </h2>
 
+
     <p class="request">
+
       ${
-        settings.instructions
+        currentSettings.instructions
           ? escapeHTML(
-              settings.instructions
+              currentSettings.instructions
             )
           : "No additional instructions provided."
       }
+
     </p>
+
 
     <div class="summary-grid">
 
       <div class="summary-box">
+
         <div class="summary-label">
           Genre
         </div>
+
         <div class="summary-value">
-          ${escapeHTML(settings.genre)}
+          ${escapeHTML(
+            currentSettings.genre
+          )}
         </div>
+
       </div>
 
+
       <div class="summary-box">
+
         <div class="summary-label">
           Length
         </div>
+
         <div class="summary-value">
-          ${settings.length} min
+          ${currentSettings.length} min
         </div>
+
       </div>
 
+
       <div class="summary-box">
+
         <div class="summary-label">
-          BPM
+          BPM Range
         </div>
+
         <div class="summary-value">
-          ${settings.startingBpm}–${settings.endingBpm}
+          ${currentSettings.startingBpm}–${currentSettings.endingBpm}
         </div>
+
       </div>
 
+
       <div class="summary-box">
+
         <div class="summary-label">
           Tracks
         </div>
+
         <div class="summary-value">
           ${tracks.length}
         </div>
+
       </div>
 
     </div>
 
-    ${
-      sections.map(
-        function(section) {
 
-          const sectionTracks =
-            tracks.slice(
-              section.start,
-              section.end
-            );
+    ${sections.map(
 
-          if (
-            !sectionTracks.length
-          ) return "";
+      function(section) {
 
-          return `
+        const sectionTracks =
+          tracks.slice(
+            section.start,
+            section.end
+          );
 
-            <div class="set-section">
 
-              <span class="time">
-                ${section.name.toUpperCase()}
-              </span>
+        if (
+          !sectionTracks.length
+        ) {
 
-              <h3>
-                ${section.name}
-              </h3>
+          return "";
 
-              <p>
-                ${section.description}
-              </p>
+        }
 
-              ${
-                sectionTracks.map(
-                  function(track,index) {
 
-                    const globalIndex =
-                      section.start
-                      +
-                      index;
+        return `
 
-                    const number =
-                      globalIndex + 1;
+          <div class="set-section">
 
-                    const nextTrack =
-                      tracks[
-                        globalIndex + 1
-                      ];
+            <span class="time">
+              ${section.name.toUpperCase()}
+            </span>
 
-                    const camelot =
-                      normalizeKey(
-                        track.key
-                      );
+            <h3>
+              ${section.name}
+            </h3>
 
-                    return `
+            <p>
+              ${section.description}
+            </p>
 
-                      <div class="track-row">
+
+            ${sectionTracks.map(
+
+              function(
+                track,
+                index
+              ) {
+
+                const globalIndex =
+                  section.start
+                  +
+                  index;
+
+
+                const number =
+                  globalIndex
+                  +
+                  1;
+
+
+                const nextTrack =
+                  tracks[
+                    globalIndex
+                    +
+                    1
+                  ];
+
+
+                const camelot =
+                  normalizeKey(
+                    track.key
+                  );
+
+
+                const locked =
+                  lockedPositions.has(
+                    globalIndex
+                  );
+
+
+                return `
+
+                  <div
+                    class="track-row
+                    ${locked ? "locked" : ""}"
+                  >
+
+                    <div class="track-top">
+
+                      <div>
 
                         <div class="track-number">
                           TRACK ${number}
@@ -2392,92 +3768,165 @@ function renderGeneratedSet(
                           ${escapeHTML(track.artist)}
                         </div>
 
-                        <div class="track-meta">
+                      </div>
 
-                          <span class="pill">
-                            ${
-                              track.bpm
-                                ? track.bpm
-                                  + " BPM"
-                                : "BPM unknown"
-                            }
-                          </span>
 
-                          ${
-                            track.key
-                              ? `
-                                <span class="pill good">
-                                  ${escapeHTML(track.key)}
-                                  ${
-                                    camelot
-                                      ? " • "
-                                        + camelot
-                                      : ""
-                                  }
-                                </span>
-                              `
-                              : ""
-                          }
+                      <div class="timing">
 
-                          ${
-                            track.genre
-                              ? `
-                                <span class="pill">
-                                  ${escapeHTML(track.genre)}
-                                </span>
-                              `
-                              : ""
-                          }
-
-                          <span class="pill">
-                            Energy ${track.energyScore}/10
-                          </span>
-
-                          <span class="pill">
-                            Target ${track.targetBpm} BPM
-                          </span>
-
-                        </div>
+                        ${formatSetTime(
+                          globalIndex
+                        )}
 
                       </div>
 
+                    </div>
+
+
+                    <div class="track-meta">
+
+                      <span class="pill">
+
+                        ${
+                          track.bpm
+                            ? track.bpm
+                              +
+                              " BPM"
+                            : "BPM unknown"
+                        }
+
+                      </span>
+
+
                       ${
-                        nextTrack
+                        track.key
                           ? `
-                            <div class="transition">
 
-                              <div class="transition-title">
-                                Transition to Track ${number + 1}
-                              </div>
+                            <span class="pill good">
 
-                              <div class="transition-text">
-                                ${escapeHTML(
-                                  getTransitionSuggestion(
-                                    track,
-                                    nextTrack,
-                                    settings.genre
-                                  )
-                                )}
-                              </div>
+                              ${escapeHTML(track.key)}
 
-                            </div>
+                              ${
+                                camelot
+                                  ? " • "
+                                    +
+                                    camelot
+                                  : ""
+                              }
+
+                            </span>
+
                           `
                           : ""
                       }
 
-                    `;
 
+                      ${
+                        track.genre
+                          ? `
+
+                            <span class="pill">
+
+                              ${escapeHTML(track.genre)}
+
+                            </span>
+
+                          `
+                          : ""
+                      }
+
+
+                      <span class="pill">
+
+                        Energy
+                        ${track.energyScore}/10
+
+                      </span>
+
+                    </div>
+
+
+                    <div class="track-actions">
+
+                      <button
+                        class="secondary-button"
+                        onclick="replaceTrack(${globalIndex})"
+                        ${locked ? "disabled" : ""}
+                      >
+
+                        ↻ Replace Track
+
+                      </button>
+
+
+                      <button
+                        class="secondary-button"
+                        onclick="toggleLock(${globalIndex})"
+                      >
+
+                        ${
+                          locked
+                            ? "🔓 Unlock"
+                            : "🔒 Lock"
+                        }
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+
+                  ${
+                    nextTrack
+                      ? `
+
+                        <div class="transition">
+
+                          <div class="transition-title">
+
+                            Transition to Track
+                            ${number + 1}
+
+                          </div>
+
+                          <div class="transition-text">
+
+                            ${escapeHTML(
+
+                              getTransitionSuggestion(
+
+                                track,
+
+                                nextTrack,
+
+                                currentSettings.genre
+
+                              )
+
+                            )}
+
+                          </div>
+
+                        </div>
+
+                      `
+                      : ""
                   }
-                ).join("")
+
+                `;
+
               }
 
-            </div>
+            ).join("")}
 
-          `;
+          </div>
 
-        }
-      ).join("")
-    }
+        `;
+
+      }
+
+    ).join("")}
+
 
     <div class="set-section">
 
@@ -2486,26 +3935,279 @@ function renderGeneratedSet(
       </h3>
 
       <p>
-        This plan balances BPM progression, genre relevance,
-        harmonic compatibility, estimated energy, track ratings,
-        and positioning within the set. Treat it as a starting
-        point rather than a rigid playlist.
+
+        This set balances BPM progression,
+        harmonic compatibility,
+        estimated energy,
+        genre relevance,
+        ratings,
+        and placement within the set.
+
+        Locked tracks will remain in place when
+        you generate another version.
+
       </p>
 
     </div>
 
+
+    <div class="result-actions">
+
+      <button
+        class="secondary-button"
+        onclick="generateAnotherVersion()"
+      >
+
+        ↻ Generate Another Version
+
+      </button>
+
+
+      <button
+        class="export-button"
+        onclick="exportRekordboxXML()"
+      >
+
+        Export to Rekordbox XML
+
+      </button>
+
+    </div>
+
+
+    <p class="export-note">
+
+      The exported Rekordbox playlist keeps
+      these tracks in this exact order.
+
+    </p>
+
   `;
 
+
   results.scrollIntoView({
-    behavior: "smooth"
+
+    behavior:
+      "smooth"
+
   });
 
 }
 
 
-/* ==========================
+/* =====================================================
+   REGENERATE
+===================================================== */
+
+function generateAnotherVersion() {
+
+  buildSet(
+    true
+  );
+
+}
+
+
+/* =====================================================
+   REKORDBOX XML EXPORT
+===================================================== */
+
+function createPlaylistName() {
+
+  const today =
+    new Date();
+
+
+  const date =
+    today
+      .toISOString()
+      .slice(
+        0,
+        10
+      );
+
+
+  return "DJ Set Planner - "
+    +
+    currentSettings.genre
+    +
+    " - "
+    +
+    currentSettings.length
+    +
+    " Min - "
+    +
+    date;
+
+}
+
+
+function exportRekordboxXML() {
+
+  if (
+    !currentSet.length
+  ) {
+
+    alert(
+      "Build a set first."
+    );
+
+    return;
+
+  }
+
+
+  const playlistName =
+    createPlaylistName();
+
+
+  const collectionTracks =
+    currentSet
+      .map(
+        track => `
+
+    <TRACK
+      TrackID="${escapeXML(track.id)}"
+      Name="${escapeXML(track.title)}"
+      Artist="${escapeXML(track.artist)}"
+      Kind="${escapeXML(track.kind || "File")}"
+      TotalTime="${escapeXML(track.totalTime || 0)}"
+      AverageBpm="${escapeXML(track.bpm || 0)}"
+      Rating="${escapeXML(track.rating || 0)}"
+      Location="${escapeXML(track.location)}"
+      Tonality="${escapeXML(track.key)}"
+      Genre="${escapeXML(track.genre)}"
+      Comments="${escapeXML(track.comments)}"
+    />
+
+        `
+      )
+      .join("");
+
+
+  const playlistTracks =
+    currentSet
+      .map(
+        track => `
+
+        <TRACK
+          Key="${escapeXML(track.id)}"
+        />
+
+        `
+      )
+      .join("");
+
+
+  const xml = `<?xml version="1.0" encoding="UTF-8" ?>
+
+<DJ_PLAYLISTS Version="1.0.0">
+
+  <PRODUCT
+    Name="DJ Set Planner"
+    Version="1.0"
+    Company="DJ Set Planner"
+  />
+
+  <COLLECTION Entries="${currentSet.length}">
+
+    ${collectionTracks}
+
+  </COLLECTION>
+
+  <PLAYLISTS>
+
+    <NODE
+      Type="0"
+      Name="ROOT"
+      Count="1"
+    >
+
+      <NODE
+        Name="${escapeXML(playlistName)}"
+        Type="1"
+        KeyType="0"
+        Entries="${currentSet.length}"
+      >
+
+        ${playlistTracks}
+
+      </NODE>
+
+    </NODE>
+
+  </PLAYLISTS>
+
+</DJ_PLAYLISTS>`;
+
+
+  const blob =
+    new Blob(
+      [xml],
+      {
+        type:
+          "application/xml"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  const safeFilename =
+    playlistName
+      .replace(
+        /[^a-z0-9-_ ]/gi,
+        ""
+      )
+      .replace(
+        /\s+/g,
+        "-"
+      );
+
+
+  link.href =
+    url;
+
+
+  link.download =
+    safeFilename
+    +
+    ".xml";
+
+
+  document
+    .body
+    .appendChild(
+      link
+    );
+
+
+  link.click();
+
+
+  link.remove();
+
+
+  URL.revokeObjectURL(
+    url
+  );
+
+}
+
+
+/* =====================================================
    UI EVENTS
-========================== */
+===================================================== */
 
 document
   .getElementById(
@@ -2516,6 +4218,7 @@ document
     refreshLibraryDisplay
   );
 
+
 document
   .getElementById(
     "filter-samples"
@@ -2525,6 +4228,7 @@ document
     refreshLibraryDisplay
   );
 
+
 document
   .getElementById(
     "filter-missing"
@@ -2533,6 +4237,17 @@ document
     "change",
     refreshLibraryDisplay
   );
+
+
+document
+  .getElementById(
+    "filter-duplicates"
+  )
+  .addEventListener(
+    "change",
+    refreshLibraryDisplay
+  );
+
 
 document
   .getElementById(
