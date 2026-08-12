@@ -103,31 +103,6 @@
   </style>
 </head>
 
-<body>
-  <main class="app">
-    <div class="logo">DJ Set Planner</div>
-
-    <h1>Build better sets.</h1>
-
-    <p class="subtitle">
-      Describe the vibe, length, genre, BPM, and energy you want.
-    </p>
-
-    <section class="card">
-      <label for="set-description">What are you playing?</label>
-
-      <textarea
-        id="set-description"
-        placeholder="Example: 60-minute late-night riddim set. Start around 145 BPM, keep the energy aggressive, and build toward a huge final 15 minutes."
-      ></textarea>
-
-      <button id="build-button">Build My Set</button>
-
-      <p class="hint">
-        Next, we'll make this button generate an actual set plan instead of just being a demo.
-      </p>
-    </section>
-  </main>
 <script>
   const button = document.getElementById("build-button");
   const description = document.getElementById("set-description");
@@ -140,8 +115,40 @@
       return;
     }
 
-    alert("Your set request: " + request);
+    let results = document.getElementById("set-results");
+
+    if (!results) {
+      results = document.createElement("section");
+      results.id = "set-results";
+      results.className = "card";
+      results.style.marginTop = "24px";
+      document.querySelector(".app").appendChild(results);
+    }
+
+    results.innerHTML = `
+      <h2>Your Set Plan</h2>
+      <p style="color:#b5b5c0;">Based on: ${request}</p>
+
+      <div style="margin-top:24px;">
+        <p><strong>1. Opening</strong><br>
+        Establish the vibe and give yourself room to build.</p>
+
+        <p><strong>2. Build</strong><br>
+        Gradually increase energy while keeping transitions smooth.</p>
+
+        <p><strong>3. First Peak</strong><br>
+        Bring in one of your strongest tracks and create the first big moment.</p>
+
+        <p><strong>4. Reset</strong><br>
+        Pull the energy back slightly so the next peak hits harder.</p>
+
+        <p><strong>5. Final Peak</strong><br>
+        Finish with your heaviest or most memorable tracks.</p>
+      </div>
+    `;
+
+    results.scrollIntoView({ behavior: "smooth" });
   });
-</script>  
+</script>
 </body>
 </html>
