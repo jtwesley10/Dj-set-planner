@@ -39,10 +39,15 @@
       margin: 0 0 12px;
     }
 
+    h2 {
+      margin-top: 0;
+    }
+
     .subtitle {
       font-size: 20px;
       color: #b5b5c0;
       margin-bottom: 36px;
+      line-height: 1.5;
     }
 
     .card {
@@ -100,55 +105,149 @@
       font-size: 14px;
       line-height: 1.5;
     }
+
+    .set-section {
+      border-top: 1px solid #2a2a35;
+      padding: 18px 0;
+    }
+
+    .set-section:first-of-type {
+      border-top: none;
+    }
+
+    .set-section h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .set-section p {
+      margin: 0;
+      color: #b5b5c0;
+      line-height: 1.5;
+    }
+
+    .request {
+      color: #8f8f9c;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    #set-results {
+      margin-top: 24px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 38px;
+      }
+
+      .card {
+        padding: 22px;
+      }
+    }
   </style>
 </head>
 
-<script>
-  const button = document.getElementById("build-button");
-  const description = document.getElementById("set-description");
+<body>
+  <main class="app">
+    <div class="logo">DJ Set Planner</div>
 
-  button.addEventListener("click", function () {
-    const request = description.value.trim();
+    <h1>Build better sets.</h1>
 
-    if (!request) {
-      alert("Tell me what kind of set you want to build first.");
-      return;
-    }
+    <p class="subtitle">
+      Describe the vibe, length, genre, BPM, and energy you want.
+    </p>
 
-    let results = document.getElementById("set-results");
+    <section class="card">
+      <label for="set-description">What are you playing?</label>
 
-    if (!results) {
-      results = document.createElement("section");
-      results.id = "set-results";
-      results.className = "card";
-      results.style.marginTop = "24px";
-      document.querySelector(".app").appendChild(results);
-    }
+      <textarea
+        id="set-description"
+        placeholder="Example: 60-minute late-night riddim set. Start around 145 BPM, keep the energy aggressive, and build toward a huge final 15 minutes."
+      ></textarea>
 
-    results.innerHTML = `
-      <h2>Your Set Plan</h2>
-      <p style="color:#b5b5c0;">Based on: ${request}</p>
+      <button id="build-button">Build My Set</button>
 
-      <div style="margin-top:24px;">
-        <p><strong>1. Opening</strong><br>
-        Establish the vibe and give yourself room to build.</p>
+      <p class="hint">
+        Describe the kind of set you want and the planner will build a basic set structure.
+      </p>
+    </section>
+  </main>
 
-        <p><strong>2. Build</strong><br>
-        Gradually increase energy while keeping transitions smooth.</p>
+  <script>
+    const button = document.getElementById("build-button");
+    const description = document.getElementById("set-description");
 
-        <p><strong>3. First Peak</strong><br>
-        Bring in one of your strongest tracks and create the first big moment.</p>
+    button.addEventListener("click", function () {
+      const request = description.value.trim();
 
-        <p><strong>4. Reset</strong><br>
-        Pull the energy back slightly so the next peak hits harder.</p>
+      if (!request) {
+        alert("Tell me what kind of set you want to build first.");
+        return;
+      }
 
-        <p><strong>5. Final Peak</strong><br>
-        Finish with your heaviest or most memorable tracks.</p>
-      </div>
-    `;
+      let results = document.getElementById("set-results");
 
-    results.scrollIntoView({ behavior: "smooth" });
-  });
-</script>
+      if (!results) {
+        results = document.createElement("section");
+        results.id = "set-results";
+        results.className = "card";
+        document.querySelector(".app").appendChild(results);
+      }
+
+      results.innerHTML = `
+        <h2>Your Set Plan</h2>
+
+        <p class="request">
+          Based on: ${request}
+        </p>
+
+        <div class="set-section">
+          <h3>1. Opening</h3>
+          <p>
+            Establish the vibe and give yourself room to build. Start with tracks
+            that clearly communicate the sound of the set without using your biggest
+            weapons too early.
+          </p>
+        </div>
+
+        <div class="set-section">
+          <h3>2. Build</h3>
+          <p>
+            Gradually increase energy while keeping transitions smooth. Introduce
+            stronger drums, heavier bass, or more recognizable elements.
+          </p>
+        </div>
+
+        <div class="set-section">
+          <h3>3. First Peak</h3>
+          <p>
+            Bring in one of your strongest tracks and create the first major moment
+            of the set.
+          </p>
+        </div>
+
+        <div class="set-section">
+          <h3>4. Reset</h3>
+          <p>
+            Pull the energy back slightly. Use a track with more space or a different
+            feel so the crowd has room before the final push.
+          </p>
+        </div>
+
+        <div class="set-section">
+          <h3>5. Final Peak</h3>
+          <p>
+            Finish with your heaviest, most memorable, or highest-energy tracks and
+            create a clear closing moment.
+          </p>
+        </div>
+      `;
+
+      results.scrollIntoView({
+        behavior: "smooth"
+      });
+    });
+  </script>
 </body>
 </html>
