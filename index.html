@@ -23,7 +23,7 @@
 
     .app {
       width: 100%;
-      max-width: 760px;
+      max-width: 850px;
     }
 
     .logo {
@@ -58,32 +58,54 @@
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
     }
 
-    label {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 10px;
-      font-weight: bold;
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 15px;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #f1f1f5;
+    }
+
+    input,
+    select,
     textarea {
       width: 100%;
-      min-height: 150px;
-      resize: vertical;
       border-radius: 12px;
       border: 1px solid #3a3a47;
       background: #0f0f14;
       color: white;
-      padding: 16px;
+      padding: 14px;
       font-size: 16px;
       outline: none;
     }
 
+    input:focus,
+    select:focus,
     textarea:focus {
       border-color: #8b5cf6;
     }
 
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
     button {
-      margin-top: 18px;
+      margin-top: 24px;
       width: 100%;
       padding: 16px;
       border: none;
@@ -106,39 +128,80 @@
       line-height: 1.5;
     }
 
-    .set-section {
-      border-top: 1px solid #2a2a35;
-      padding: 18px 0;
+    #set-results {
+      margin-top: 24px;
     }
 
-    .set-section:first-of-type {
-      border-top: none;
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .summary-box {
+      background: #0f0f14;
+      border: 1px solid #2a2a35;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .summary-label {
+      color: #777785;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .summary-value {
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .set-section {
+      border-top: 1px solid #2a2a35;
+      padding: 20px 0;
     }
 
     .set-section h3 {
       margin: 0 0 8px;
-      font-size: 18px;
+      font-size: 19px;
     }
 
     .set-section p {
       margin: 0;
       color: #b5b5c0;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    .time {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: #8b5cf6;
+      font-size: 13px;
+      font-weight: bold;
     }
 
     .request {
       color: #8f8f9c;
-      font-style: italic;
       line-height: 1.5;
     }
 
-    #set-results {
-      margin-top: 24px;
-    }
-
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       h1 {
         font-size: 38px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full-width {
+        grid-column: auto;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
       }
 
       .card {
@@ -155,35 +218,184 @@
     <h1>Build better sets.</h1>
 
     <p class="subtitle">
-      Describe the vibe, length, genre, BPM, and energy you want.
+      Tell us what you're playing and we'll map out the energy, pacing, and flow.
     </p>
 
     <section class="card">
-      <label for="set-description">What are you playing?</label>
+      <div class="form-grid">
 
-      <textarea
-        id="set-description"
-        placeholder="Example: 60-minute late-night riddim set. Start around 145 BPM, keep the energy aggressive, and build toward a huge final 15 minutes."
-      ></textarea>
+        <div class="form-group">
+          <label for="genre">Genre</label>
+          <select id="genre">
+            <option value="House">House</option>
+            <option value="Tech House">Tech House</option>
+            <option value="Melodic House">Melodic House</option>
+            <option value="Dubstep">Dubstep</option>
+            <option value="Riddim">Riddim</option>
+            <option value="Drum & Bass">Drum & Bass</option>
+            <option value="Open Format">Open Format</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="length">Set Length</label>
+          <select id="length">
+            <option value="30">30 minutes</option>
+            <option value="60" selected>60 minutes</option>
+            <option value="90">90 minutes</option>
+            <option value="120">120 minutes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="bpm">Starting BPM</label>
+          <input
+            type="number"
+            id="bpm"
+            value="128"
+            min="60"
+            max="200"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="energy">Energy</label>
+          <select id="energy">
+            <option value="Chill">Chill</option>
+            <option value="Building">Building</option>
+            <option value="High" selected>High</option>
+            <option value="Aggressive">Aggressive</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="venue">Venue / Setting</label>
+          <select id="venue">
+            <option value="Club">Club</option>
+            <option value="Festival">Festival</option>
+            <option value="House Party">House Party</option>
+            <option value="Coffee Shop">Coffee Shop</option>
+            <option value="Livestream">Livestream</option>
+            <option value="After Party">After Party</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="instructions">Set Instructions</label>
+          <textarea
+            id="instructions"
+            placeholder="Example: Start smooth, get heavier around halfway, create a big peak in the final 15 minutes, and leave room for a memorable closer."
+          ></textarea>
+        </div>
+
+      </div>
 
       <button id="build-button">Build My Set</button>
 
       <p class="hint">
-        Describe the kind of set you want and the planner will build a basic set structure.
+        For now, this builds the structure of the set. Next we'll connect it to your actual track library.
       </p>
     </section>
   </main>
 
   <script>
     const button = document.getElementById("build-button");
-    const description = document.getElementById("set-description");
 
     button.addEventListener("click", function () {
-      const request = description.value.trim();
+      const genre = document.getElementById("genre").value;
+      const length = Number(document.getElementById("length").value);
+      const bpm = Number(document.getElementById("bpm").value);
+      const energy = document.getElementById("energy").value;
+      const venue = document.getElementById("venue").value;
+      const instructions = document.getElementById("instructions").value.trim();
 
-      if (!request) {
-        alert("Tell me what kind of set you want to build first.");
+      if (!bpm || bpm < 60 || bpm > 200) {
+        alert("Enter a starting BPM between 60 and 200.");
         return;
+      }
+
+      let bpmIncrease = 4;
+
+      if (energy === "Chill") bpmIncrease = 2;
+      if (energy === "Building") bpmIncrease = 4;
+      if (energy === "High") bpmIncrease = 6;
+      if (energy === "Aggressive") bpmIncrease = 8;
+
+      const peakBpm = bpm + bpmIncrease;
+
+      const openingEnd = Math.round(length * 0.15);
+      const buildEnd = Math.round(length * 0.4);
+      const peakEnd = Math.round(length * 0.62);
+      const resetEnd = Math.round(length * 0.75);
+
+      let openingText =
+        "Establish the sound of the set without immediately using your biggest tracks.";
+
+      let buildText =
+        "Increase intensity gradually while keeping the transitions musical and controlled.";
+
+      let peakText =
+        "Create the first major payoff with stronger tracks and more obvious crowd moments.";
+
+      let resetText =
+        "Pull the intensity back slightly so the final section has room to feel bigger.";
+
+      let finalText =
+        "Push toward the highest-energy portion of the set and finish with a memorable closer.";
+
+      if (energy === "Chill") {
+        openingText =
+          "Set a relaxed groove and focus on smooth blends, space, and consistency.";
+
+        buildText =
+          "Add movement without dramatically changing the mood. Let the groove do the work.";
+
+        peakText =
+          "Create a subtle high point using one of your strongest melodic or rhythmic tracks.";
+
+        resetText =
+          "Give the set room to breathe with something spacious or understated.";
+
+        finalText =
+          "Finish confidently without forcing a huge energy jump.";
+      }
+
+      if (energy === "Aggressive") {
+        openingText =
+          "Start with authority, but save your biggest weapons. Establish tension immediately.";
+
+        buildText =
+          "Increase impact quickly with heavier drums, bass, shorter transitions, or faster switches.";
+
+        peakText =
+          "Deliver the first major impact section with high-energy tracks and strong contrast.";
+
+        resetText =
+          "Use a short breather or unexpected switch so the crowd is ready for the final assault.";
+
+        finalText =
+          "Use your hardest and most memorable tracks here. Prioritize impact over subtlety.";
+      }
+
+      if (genre === "Riddim" || genre === "Dubstep") {
+        buildText +=
+          " Look for opportunities to use doubles, fake-outs, quick cuts, and drop swaps.";
+
+        finalText +=
+          " Consider saving your strongest double or most recognizable drop for the closing stretch.";
+      }
+
+      if (
+        genre === "House" ||
+        genre === "Tech House" ||
+        genre === "Melodic House"
+      ) {
+        buildText +=
+          " Favor phrased transitions, gradual EQ swaps, and consistent groove.";
+
+        resetText +=
+          " A vocal, melodic breakdown, or percussion-focused track can work well here.";
       }
 
       let results = document.getElementById("set-results");
@@ -199,47 +411,70 @@
         <h2>Your Set Plan</h2>
 
         <p class="request">
-          Based on: ${request}
+          ${instructions
+            ? instructions
+            : "No additional instructions provided."}
         </p>
 
+        <div class="summary-grid">
+
+          <div class="summary-box">
+            <div class="summary-label">Genre</div>
+            <div class="summary-value">${genre}</div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-label">Length</div>
+            <div class="summary-value">${length} min</div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-label">BPM Range</div>
+            <div class="summary-value">${bpm}–${peakBpm}</div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-label">Energy</div>
+            <div class="summary-value">${energy}</div>
+          </div>
+
+        </div>
+
         <div class="set-section">
+          <span class="time">0–${openingEnd} MIN</span>
           <h3>1. Opening</h3>
-          <p>
-            Establish the vibe and give yourself room to build. Start with tracks
-            that clearly communicate the sound of the set without using your biggest
-            weapons too early.
-          </p>
+          <p>${openingText}</p>
         </div>
 
         <div class="set-section">
+          <span class="time">${openingEnd}–${buildEnd} MIN</span>
           <h3>2. Build</h3>
-          <p>
-            Gradually increase energy while keeping transitions smooth. Introduce
-            stronger drums, heavier bass, or more recognizable elements.
-          </p>
+          <p>${buildText}</p>
         </div>
 
         <div class="set-section">
+          <span class="time">${buildEnd}–${peakEnd} MIN</span>
           <h3>3. First Peak</h3>
-          <p>
-            Bring in one of your strongest tracks and create the first major moment
-            of the set.
-          </p>
+          <p>${peakText}</p>
         </div>
 
         <div class="set-section">
+          <span class="time">${peakEnd}–${resetEnd} MIN</span>
           <h3>4. Reset</h3>
-          <p>
-            Pull the energy back slightly. Use a track with more space or a different
-            feel so the crowd has room before the final push.
-          </p>
+          <p>${resetText}</p>
         </div>
 
         <div class="set-section">
-          <h3>5. Final Peak</h3>
+          <span class="time">${resetEnd}–${length} MIN</span>
+          <h3>5. Final Peak / Closer</h3>
+          <p>${finalText}</p>
+        </div>
+
+        <div class="set-section">
+          <h3>Venue Strategy</h3>
           <p>
-            Finish with your heaviest, most memorable, or highest-energy tracks and
-            create a clear closing moment.
+            This set is designed for a <strong>${venue}</strong> environment.
+            Keep the pacing responsive to the room rather than treating the plan as a rigid playlist.
           </p>
         </div>
       `;
