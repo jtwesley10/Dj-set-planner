@@ -18,12 +18,12 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 40px 20px 80px;
     }
 
     .app {
       width: 100%;
-      max-width: 850px;
+      max-width: 900px;
     }
 
     .logo {
@@ -43,6 +43,10 @@
       margin-top: 0;
     }
 
+    h3 {
+      margin-top: 0;
+    }
+
     .subtitle {
       font-size: 20px;
       color: #b5b5c0;
@@ -56,6 +60,7 @@
       border-radius: 18px;
       padding: 28px;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+      margin-bottom: 24px;
     }
 
     .form-grid {
@@ -104,6 +109,12 @@
       resize: vertical;
     }
 
+    input[type="file"] {
+      padding: 18px;
+      border-style: dashed;
+      cursor: pointer;
+    }
+
     button {
       margin-top: 24px;
       width: 100%;
@@ -121,15 +132,43 @@
       opacity: 0.92;
     }
 
+    .secondary-button {
+      background: #24242e;
+      border: 1px solid #3a3a47;
+    }
+
     .hint {
-      margin-top: 16px;
+      margin-top: 14px;
       color: #777785;
       font-size: 14px;
       line-height: 1.5;
     }
 
-    #set-results {
-      margin-top: 24px;
+    .status {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #0f0f14;
+      border: 1px solid #2a2a35;
+      color: #b5b5c0;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      border-color: #3b7d5b;
+    }
+
+    .status.error {
+      display: block;
+      border-color: #a04444;
+    }
+
+    .library-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
     }
 
     .summary-grid {
@@ -158,18 +197,86 @@
       font-weight: bold;
     }
 
-    .set-section {
-      border-top: 1px solid #2a2a35;
-      padding: 20px 0;
+    .library-preview {
+      margin-top: 24px;
+      overflow-x: auto;
     }
 
-    .set-section h3 {
-      margin: 0 0 8px;
-      font-size: 19px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #2a2a35;
+      font-size: 14px;
+    }
+
+    th {
+      color: #8f8f9c;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: #d7d7df;
+    }
+
+    .track-row {
+      background: #0f0f14;
+      border: 1px solid #2a2a35;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+
+    .track-number {
+      color: #8b5cf6;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .track-title {
+      font-size: 17px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .track-artist {
+      color: #a7a7b2;
+      margin-bottom: 10px;
+    }
+
+    .track-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      background: #24242e;
+      border: 1px solid #353542;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #bcbcc7;
+      font-size: 12px;
+    }
+
+    .set-section {
+      border-top: 1px solid #2a2a35;
+      padding: 24px 0;
+    }
+
+    .set-section:first-of-type {
+      border-top: none;
     }
 
     .set-section p {
-      margin: 0;
       color: #b5b5c0;
       line-height: 1.6;
     }
@@ -187,6 +294,15 @@
       line-height: 1.5;
     }
 
+    .empty-message {
+      background: #0f0f14;
+      border: 1px dashed #3a3a47;
+      padding: 20px;
+      border-radius: 12px;
+      color: #a7a7b2;
+      line-height: 1.6;
+    }
+
     @media (max-width: 700px) {
       h1 {
         font-size: 38px;
@@ -200,7 +316,8 @@
         grid-column: auto;
       }
 
-      .summary-grid {
+      .summary-grid,
+      .library-summary {
         grid-template-columns: 1fr 1fr;
       }
 
@@ -212,20 +329,54 @@
 </head>
 
 <body>
+
   <main class="app">
+
     <div class="logo">DJ Set Planner</div>
 
     <h1>Build better sets.</h1>
 
     <p class="subtitle">
-      Tell us what you're playing and we'll map out the energy, pacing, and flow.
+      Import your DJ library, describe the set you want to play, and build a track plan from music you actually own.
     </p>
 
+
+    <!-- LIBRARY -->
+
     <section class="card">
+
+      <h2>1. Import Your DJ Library</h2>
+
+      <p class="hint">
+        Export your Rekordbox collection as XML or CSV, then upload it here.
+        Your file is processed locally in your browser for this version.
+      </p>
+
+      <input
+        type="file"
+        id="library-file"
+        accept=".xml,.csv,text/xml,text/csv"
+      />
+
+      <div id="library-status" class="status"></div>
+
+      <div id="library-info"></div>
+
+    </section>
+
+
+    <!-- SET BRIEF -->
+
+    <section class="card">
+
+      <h2>2. Create Your Set Brief</h2>
+
       <div class="form-grid">
 
         <div class="form-group">
+
           <label for="genre">Genre</label>
+
           <select id="genre">
             <option value="House">House</option>
             <option value="Tech House">Tech House</option>
@@ -235,20 +386,28 @@
             <option value="Drum & Bass">Drum & Bass</option>
             <option value="Open Format">Open Format</option>
           </select>
+
         </div>
 
+
         <div class="form-group">
+
           <label for="length">Set Length</label>
+
           <select id="length">
             <option value="30">30 minutes</option>
             <option value="60" selected>60 minutes</option>
             <option value="90">90 minutes</option>
             <option value="120">120 minutes</option>
           </select>
+
         </div>
 
+
         <div class="form-group">
+
           <label for="bpm">Starting BPM</label>
+
           <input
             type="number"
             id="bpm"
@@ -256,20 +415,28 @@
             min="60"
             max="200"
           />
+
         </div>
 
+
         <div class="form-group">
+
           <label for="energy">Energy</label>
+
           <select id="energy">
             <option value="Chill">Chill</option>
             <option value="Building">Building</option>
             <option value="High" selected>High</option>
             <option value="Aggressive">Aggressive</option>
           </select>
+
         </div>
 
+
         <div class="form-group full-width">
+
           <label for="venue">Venue / Setting</label>
+
           <select id="venue">
             <option value="Club">Club</option>
             <option value="Festival">Festival</option>
@@ -279,210 +446,1563 @@
             <option value="After Party">After Party</option>
             <option value="Other">Other</option>
           </select>
+
         </div>
 
+
         <div class="form-group full-width">
+
           <label for="instructions">Set Instructions</label>
+
           <textarea
             id="instructions"
-            placeholder="Example: Start smooth, get heavier around halfway, create a big peak in the final 15 minutes, and leave room for a memorable closer."
+            placeholder="Example: Start smooth, get heavier around halfway, create a huge peak in the final 15 minutes, and save my strongest track for the closer."
           ></textarea>
+
         </div>
 
       </div>
 
-      <button id="build-button">Build My Set</button>
+
+      <button id="build-button">
+        Build My Set
+      </button>
+
 
       <p class="hint">
-        For now, this builds the structure of the set. Next we'll connect it to your actual track library.
+        Version 3 uses BPM, genre, rating, key and your set brief to choose tracks from your imported library.
       </p>
+
     </section>
+
   </main>
 
-  <script>
-    const button = document.getElementById("build-button");
 
-    button.addEventListener("click", function () {
-      const genre = document.getElementById("genre").value;
-      const length = Number(document.getElementById("length").value);
-      const bpm = Number(document.getElementById("bpm").value);
-      const energy = document.getElementById("energy").value;
-      const venue = document.getElementById("venue").value;
-      const instructions = document.getElementById("instructions").value.trim();
+<script>
 
-      if (!bpm || bpm < 60 || bpm > 200) {
-        alert("Enter a starting BPM between 60 and 200.");
-        return;
-      }
+let djLibrary = [];
 
-      let bpmIncrease = 4;
 
-      if (energy === "Chill") bpmIncrease = 2;
-      if (energy === "Building") bpmIncrease = 4;
-      if (energy === "High") bpmIncrease = 6;
-      if (energy === "Aggressive") bpmIncrease = 8;
+/* ------------------------------
+   SAFETY / DISPLAY
+------------------------------ */
 
-      const peakBpm = bpm + bpmIncrease;
+function escapeHTML(value) {
 
-      const openingEnd = Math.round(length * 0.15);
-      const buildEnd = Math.round(length * 0.4);
-      const peakEnd = Math.round(length * 0.62);
-      const resetEnd = Math.round(length * 0.75);
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 
-      let openingText =
-        "Establish the sound of the set without immediately using your biggest tracks.";
+}
 
-      let buildText =
-        "Increase intensity gradually while keeping the transitions musical and controlled.";
 
-      let peakText =
-        "Create the first major payoff with stronger tracks and more obvious crowd moments.";
+/* ------------------------------
+   LIBRARY IMPORT
+------------------------------ */
 
-      let resetText =
-        "Pull the intensity back slightly so the final section has room to feel bigger.";
+const libraryFile =
+  document.getElementById("library-file");
 
-      let finalText =
-        "Push toward the highest-energy portion of the set and finish with a memorable closer.";
+libraryFile.addEventListener(
+  "change",
+  handleLibraryUpload
+);
 
-      if (energy === "Chill") {
-        openingText =
-          "Set a relaxed groove and focus on smooth blends, space, and consistency.";
 
-        buildText =
-          "Add movement without dramatically changing the mood. Let the groove do the work.";
+function handleLibraryUpload(event) {
 
-        peakText =
-          "Create a subtle high point using one of your strongest melodic or rhythmic tracks.";
+  const file = event.target.files[0];
 
-        resetText =
-          "Give the set room to breathe with something spacious or understated.";
+  if (!file) return;
 
-        finalText =
-          "Finish confidently without forcing a huge energy jump.";
-      }
 
-      if (energy === "Aggressive") {
-        openingText =
-          "Start with authority, but save your biggest weapons. Establish tension immediately.";
+  const reader = new FileReader();
 
-        buildText =
-          "Increase impact quickly with heavier drums, bass, shorter transitions, or faster switches.";
 
-        peakText =
-          "Deliver the first major impact section with high-energy tracks and strong contrast.";
+  reader.onload = function(e) {
 
-        resetText =
-          "Use a short breather or unexpected switch so the crowd is ready for the final assault.";
+    const contents = e.target.result;
 
-        finalText =
-          "Use your hardest and most memorable tracks here. Prioritize impact over subtlety.";
-      }
-
-      if (genre === "Riddim" || genre === "Dubstep") {
-        buildText +=
-          " Look for opportunities to use doubles, fake-outs, quick cuts, and drop swaps.";
-
-        finalText +=
-          " Consider saving your strongest double or most recognizable drop for the closing stretch.";
-      }
+    try {
 
       if (
-        genre === "House" ||
-        genre === "Tech House" ||
-        genre === "Melodic House"
+        file.name
+          .toLowerCase()
+          .endsWith(".xml")
       ) {
-        buildText +=
-          " Favor phrased transitions, gradual EQ swaps, and consistent groove.";
 
-        resetText +=
-          " A vocal, melodic breakdown, or percussion-focused track can work well here.";
+        djLibrary =
+          parseRekordboxXML(contents);
+
       }
 
-      let results = document.getElementById("set-results");
+      else if (
+        file.name
+          .toLowerCase()
+          .endsWith(".csv")
+      ) {
 
-      if (!results) {
-        results = document.createElement("section");
-        results.id = "set-results";
-        results.className = "card";
-        document.querySelector(".app").appendChild(results);
+        djLibrary =
+          parseCSV(contents);
+
       }
 
-      results.innerHTML = `
-        <h2>Your Set Plan</h2>
+      else {
 
-        <p class="request">
-          ${instructions
-            ? instructions
-            : "No additional instructions provided."}
-        </p>
+        throw new Error(
+          "Please upload an XML or CSV file."
+        );
 
-        <div class="summary-grid">
+      }
 
-          <div class="summary-box">
-            <div class="summary-label">Genre</div>
-            <div class="summary-value">${genre}</div>
-          </div>
 
-          <div class="summary-box">
-            <div class="summary-label">Length</div>
-            <div class="summary-value">${length} min</div>
-          </div>
+      if (!djLibrary.length) {
 
-          <div class="summary-box">
-            <div class="summary-label">BPM Range</div>
-            <div class="summary-value">${bpm}–${peakBpm}</div>
-          </div>
+        throw new Error(
+          "No tracks were found in that file."
+        );
 
-          <div class="summary-box">
-            <div class="summary-label">Energy</div>
-            <div class="summary-value">${energy}</div>
-          </div>
+      }
 
-        </div>
 
-        <div class="set-section">
-          <span class="time">0–${openingEnd} MIN</span>
-          <h3>1. Opening</h3>
-          <p>${openingText}</p>
-        </div>
+      showLibrarySuccess(file.name);
 
-        <div class="set-section">
-          <span class="time">${openingEnd}–${buildEnd} MIN</span>
-          <h3>2. Build</h3>
-          <p>${buildText}</p>
-        </div>
+    }
 
-        <div class="set-section">
-          <span class="time">${buildEnd}–${peakEnd} MIN</span>
-          <h3>3. First Peak</h3>
-          <p>${peakText}</p>
-        </div>
+    catch(error) {
 
-        <div class="set-section">
-          <span class="time">${peakEnd}–${resetEnd} MIN</span>
-          <h3>4. Reset</h3>
-          <p>${resetText}</p>
-        </div>
+      showLibraryError(
+        error.message
+      );
 
-        <div class="set-section">
-          <span class="time">${resetEnd}–${length} MIN</span>
-          <h3>5. Final Peak / Closer</h3>
-          <p>${finalText}</p>
-        </div>
+    }
 
-        <div class="set-section">
-          <h3>Venue Strategy</h3>
-          <p>
-            This set is designed for a <strong>${venue}</strong> environment.
-            Keep the pacing responsive to the room rather than treating the plan as a rigid playlist.
-          </p>
-        </div>
-      `;
+  };
 
-      results.scrollIntoView({
-        behavior: "smooth"
-      });
+
+  reader.readAsText(file);
+
+}
+
+
+/* ------------------------------
+   REKORDBOX XML
+------------------------------ */
+
+function parseRekordboxXML(text) {
+
+  const parser =
+    new DOMParser();
+
+  const xml =
+    parser.parseFromString(
+      text,
+      "text/xml"
+    );
+
+
+  if (
+    xml.querySelector(
+      "parsererror"
+    )
+  ) {
+
+    throw new Error(
+      "The XML file could not be read."
+    );
+
+  }
+
+
+  const tracks =
+    Array.from(
+      xml.querySelectorAll(
+        "COLLECTION > TRACK"
+      )
+    );
+
+
+  return tracks.map(
+    function(track) {
+
+      return {
+
+        title:
+          track.getAttribute(
+            "Name"
+          ) || "Unknown Track",
+
+        artist:
+          track.getAttribute(
+            "Artist"
+          ) || "Unknown Artist",
+
+        bpm:
+          Number(
+            track.getAttribute(
+              "AverageBpm"
+            )
+          ) || 0,
+
+        key:
+          track.getAttribute(
+            "Tonality"
+          ) || "",
+
+        genre:
+          track.getAttribute(
+            "Genre"
+          ) || "",
+
+        rating:
+          Number(
+            track.getAttribute(
+              "Rating"
+            )
+          ) || 0,
+
+        location:
+          track.getAttribute(
+            "Location"
+          ) || ""
+
+      };
+
+    }
+  );
+
+}
+
+
+/* ------------------------------
+   CSV IMPORT
+------------------------------ */
+
+function parseCSV(text) {
+
+  const rows =
+    splitCSVRows(text);
+
+
+  if (rows.length < 2) {
+
+    throw new Error(
+      "The CSV file does not contain track data."
+    );
+
+  }
+
+
+  const headers =
+    parseCSVLine(rows[0])
+      .map(
+        header =>
+          header.trim()
+      );
+
+
+  const tracks = [];
+
+
+  for (
+    let i = 1;
+    i < rows.length;
+    i++
+  ) {
+
+    if (
+      !rows[i].trim()
+    ) continue;
+
+
+    const values =
+      parseCSVLine(
+        rows[i]
+      );
+
+
+    const row = {};
+
+
+    headers.forEach(
+      function(header,index) {
+
+        row[
+          header.toLowerCase()
+        ] =
+          values[index] ?? "";
+
+      }
+    );
+
+
+    const title =
+      getCSVValue(
+        row,
+        [
+          "name",
+          "title",
+          "track title",
+          "track"
+        ]
+      );
+
+
+    if (!title) continue;
+
+
+    tracks.push({
+
+      title: title,
+
+      artist:
+        getCSVValue(
+          row,
+          [
+            "artist",
+            "artists"
+          ]
+        ) ||
+        "Unknown Artist",
+
+      bpm:
+        Number(
+          getCSVValue(
+            row,
+            [
+              "bpm",
+              "average bpm",
+              "averagebpm"
+            ]
+          )
+        ) || 0,
+
+      key:
+        getCSVValue(
+          row,
+          [
+            "key",
+            "tonality"
+          ]
+        ) || "",
+
+      genre:
+        getCSVValue(
+          row,
+          [
+            "genre"
+          ]
+        ) || "",
+
+      rating:
+        Number(
+          getCSVValue(
+            row,
+            [
+              "rating"
+            ]
+          )
+        ) || 0,
+
+      location:
+        ""
+
     });
-  </script>
+
+  }
+
+
+  return tracks;
+
+}
+
+
+function getCSVValue(
+  row,
+  possibilities
+) {
+
+  for (
+    const key
+    of possibilities
+  ) {
+
+    if (
+      row[key] !== undefined
+    ) {
+
+      return row[key];
+
+    }
+
+  }
+
+  return "";
+
+}
+
+
+function splitCSVRows(text) {
+
+  const rows = [];
+
+  let current = "";
+
+  let insideQuotes = false;
+
+
+  for (
+    let i = 0;
+    i < text.length;
+    i++
+  ) {
+
+    const char =
+      text[i];
+
+
+    if (
+      char === '"'
+    ) {
+
+      if (
+        insideQuotes &&
+        text[i + 1] === '"'
+      ) {
+
+        current += '""';
+
+        i++;
+
+      }
+
+      else {
+
+        insideQuotes =
+          !insideQuotes;
+
+        current += char;
+
+      }
+
+    }
+
+    else if (
+      (char === "\n" ||
+       char === "\r") &&
+      !insideQuotes
+    ) {
+
+      if (
+        current.trim()
+      ) {
+
+        rows.push(current);
+
+      }
+
+      current = "";
+
+
+      if (
+        char === "\r" &&
+        text[i + 1] === "\n"
+      ) {
+
+        i++;
+
+      }
+
+    }
+
+    else {
+
+      current += char;
+
+    }
+
+  }
+
+
+  if (
+    current.trim()
+  ) {
+
+    rows.push(current);
+
+  }
+
+
+  return rows;
+
+}
+
+
+function parseCSVLine(line) {
+
+  const values = [];
+
+  let current = "";
+
+  let insideQuotes = false;
+
+
+  for (
+    let i = 0;
+    i < line.length;
+    i++
+  ) {
+
+    const char =
+      line[i];
+
+
+    if (
+      char === '"'
+    ) {
+
+      if (
+        insideQuotes &&
+        line[i + 1] === '"'
+      ) {
+
+        current += '"';
+
+        i++;
+
+      }
+
+      else {
+
+        insideQuotes =
+          !insideQuotes;
+
+      }
+
+    }
+
+    else if (
+      char === "," &&
+      !insideQuotes
+    ) {
+
+      values.push(current);
+
+      current = "";
+
+    }
+
+    else {
+
+      current += char;
+
+    }
+
+  }
+
+
+  values.push(current);
+
+  return values;
+
+}
+
+
+/* ------------------------------
+   LIBRARY DISPLAY
+------------------------------ */
+
+function showLibrarySuccess(
+  filename
+) {
+
+  const status =
+    document.getElementById(
+      "library-status"
+    );
+
+
+  status.className =
+    "status success";
+
+  status.textContent =
+    "Library imported successfully: " +
+    filename;
+
+
+  const bpmTracks =
+    djLibrary.filter(
+      track =>
+        track.bpm > 0
+    );
+
+
+  const avgBpm =
+    bpmTracks.length
+      ? Math.round(
+          bpmTracks.reduce(
+            (sum,track) =>
+              sum + track.bpm,
+            0
+          )
+          /
+          bpmTracks.length
+        )
+      : "—";
+
+
+  const genres =
+    new Set(
+      djLibrary
+        .map(
+          track =>
+            track.genre
+        )
+        .filter(Boolean)
+    );
+
+
+  const keyed =
+    djLibrary.filter(
+      track =>
+        track.key
+    ).length;
+
+
+  const preview =
+    djLibrary.slice(0,8);
+
+
+  const info =
+    document.getElementById(
+      "library-info"
+    );
+
+
+  info.innerHTML = `
+
+    <div class="library-summary">
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Tracks
+        </div>
+
+        <div class="summary-value">
+          ${djLibrary.length}
+        </div>
+
+      </div>
+
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Avg BPM
+        </div>
+
+        <div class="summary-value">
+          ${avgBpm}
+        </div>
+
+      </div>
+
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Genres
+        </div>
+
+        <div class="summary-value">
+          ${genres.size}
+        </div>
+
+      </div>
+
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Tracks With Key
+        </div>
+
+        <div class="summary-value">
+          ${keyed}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="library-preview">
+
+      <h3>
+        Library Preview
+      </h3>
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Track</th>
+
+            <th>Artist</th>
+
+            <th>BPM</th>
+
+            <th>Key</th>
+
+            <th>Genre</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${preview.map(
+            track => `
+
+            <tr>
+
+              <td>
+                ${escapeHTML(track.title)}
+              </td>
+
+              <td>
+                ${escapeHTML(track.artist)}
+              </td>
+
+              <td>
+                ${track.bpm || "—"}
+              </td>
+
+              <td>
+                ${escapeHTML(track.key || "—")}
+              </td>
+
+              <td>
+                ${escapeHTML(track.genre || "—")}
+              </td>
+
+            </tr>
+
+          `
+          ).join("")}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+
+function showLibraryError(
+  message
+) {
+
+  djLibrary = [];
+
+
+  const status =
+    document.getElementById(
+      "library-status"
+    );
+
+
+  status.className =
+    "status error";
+
+  status.textContent =
+    message;
+
+
+  document.getElementById(
+    "library-info"
+  ).innerHTML = "";
+
+}
+
+
+/* ------------------------------
+   TRACK SCORING
+------------------------------ */
+
+function scoreTrack(
+  track,
+  targetBpm,
+  genre,
+  position,
+  totalTracks
+) {
+
+  let score = 100;
+
+
+  if (
+    track.bpm > 0
+  ) {
+
+    const difference =
+      Math.abs(
+        track.bpm -
+        targetBpm
+      );
+
+    score -=
+      difference * 7;
+
+  }
+
+  else {
+
+    score -= 25;
+
+  }
+
+
+  const trackGenre =
+    track.genre
+      .toLowerCase();
+
+  const requestedGenre =
+    genre
+      .toLowerCase();
+
+
+  if (
+    requestedGenre !==
+    "open format"
+  ) {
+
+    if (
+      trackGenre.includes(
+        requestedGenre
+      ) ||
+      requestedGenre.includes(
+        trackGenre
+      )
+    ) {
+
+      score += 30;
+
+    }
+
+    else if (
+      trackGenre
+    ) {
+
+      score -= 10;
+
+    }
+
+  }
+
+
+  if (
+    track.rating
+  ) {
+
+    score +=
+      track.rating * 2;
+
+  }
+
+
+  const progress =
+    totalTracks > 1
+      ? position /
+        (totalTracks - 1)
+      : 0;
+
+
+  if (
+    progress > 0.75 &&
+    track.rating >= 4
+  ) {
+
+    score += 10;
+
+  }
+
+
+  return score;
+
+}
+
+
+/* ------------------------------
+   SET GENERATOR
+------------------------------ */
+
+document
+  .getElementById(
+    "build-button"
+  )
+  .addEventListener(
+    "click",
+    buildSet
+  );
+
+
+function buildSet() {
+
+  const genre =
+    document.getElementById(
+      "genre"
+    ).value;
+
+  const length =
+    Number(
+      document.getElementById(
+        "length"
+      ).value
+    );
+
+  const startingBpm =
+    Number(
+      document.getElementById(
+        "bpm"
+      ).value
+    );
+
+  const energy =
+    document.getElementById(
+      "energy"
+    ).value;
+
+  const venue =
+    document.getElementById(
+      "venue"
+    ).value;
+
+  const instructions =
+    document.getElementById(
+      "instructions"
+    ).value.trim();
+
+
+  if (
+    !startingBpm ||
+    startingBpm < 60 ||
+    startingBpm > 200
+  ) {
+
+    alert(
+      "Enter a starting BPM between 60 and 200."
+    );
+
+    return;
+
+  }
+
+
+  let bpmIncrease = 4;
+
+
+  if (
+    energy === "Chill"
+  ) bpmIncrease = 2;
+
+
+  if (
+    energy === "Building"
+  ) bpmIncrease = 4;
+
+
+  if (
+    energy === "High"
+  ) bpmIncrease = 6;
+
+
+  if (
+    energy === "Aggressive"
+  ) bpmIncrease = 8;
+
+
+  const endingBpm =
+    startingBpm +
+    bpmIncrease;
+
+
+  let results =
+    document.getElementById(
+      "set-results"
+    );
+
+
+  if (!results) {
+
+    results =
+      document.createElement(
+        "section"
+      );
+
+    results.id =
+      "set-results";
+
+    results.className =
+      "card";
+
+    document.querySelector(
+      ".app"
+    ).appendChild(
+      results
+    );
+
+  }
+
+
+  if (
+    !djLibrary.length
+  ) {
+
+    results.innerHTML = `
+
+      <h2>
+        Your Set Plan
+      </h2>
+
+      <div class="empty-message">
+
+        Your set brief is ready, but you haven't imported a DJ library yet.
+
+        <br><br>
+
+        Import a Rekordbox XML or CSV file above so the planner can start choosing actual tracks.
+
+      </div>
+
+    `;
+
+
+    results.scrollIntoView({
+      behavior:
+        "smooth"
+    });
+
+
+    return;
+
+  }
+
+
+  const estimatedTracks =
+    Math.max(
+      6,
+      Math.min(
+        30,
+        Math.round(
+          length / 4
+        )
+      )
+    );
+
+
+  const available =
+    [...djLibrary];
+
+
+  const chosenTracks = [];
+
+
+  for (
+    let position = 0;
+    position <
+    estimatedTracks;
+    position++
+  ) {
+
+    if (
+      !available.length
+    ) break;
+
+
+    const progress =
+      estimatedTracks > 1
+        ? position /
+          (estimatedTracks - 1)
+        : 0;
+
+
+    const targetBpm =
+      startingBpm +
+      (
+        endingBpm -
+        startingBpm
+      ) *
+      progress;
+
+
+    let bestIndex = 0;
+
+    let bestScore =
+      -Infinity;
+
+
+    available.forEach(
+      function(track,index) {
+
+        const score =
+          scoreTrack(
+            track,
+            targetBpm,
+            genre,
+            position,
+            estimatedTracks
+          );
+
+
+        if (
+          score >
+          bestScore
+        ) {
+
+          bestScore =
+            score;
+
+          bestIndex =
+            index;
+
+        }
+
+      }
+    );
+
+
+    const selected =
+      available.splice(
+        bestIndex,
+        1
+      )[0];
+
+
+    selected.targetBpm =
+      Math.round(
+        targetBpm
+      );
+
+
+    chosenTracks.push(
+      selected
+    );
+
+  }
+
+
+  renderGeneratedSet(
+    chosenTracks,
+    {
+      genre,
+      length,
+      startingBpm,
+      endingBpm,
+      energy,
+      venue,
+      instructions
+    }
+  );
+
+}
+
+
+/* ------------------------------
+   SET DISPLAY
+------------------------------ */
+
+function renderGeneratedSet(
+  tracks,
+  settings
+) {
+
+  const results =
+    document.getElementById(
+      "set-results"
+    );
+
+
+  const count =
+    tracks.length;
+
+
+  const openingEnd =
+    Math.max(
+      1,
+      Math.round(
+        count * 0.2
+      )
+    );
+
+
+  const buildEnd =
+    Math.max(
+      openingEnd + 1,
+      Math.round(
+        count * 0.45
+      )
+    );
+
+
+  const peakEnd =
+    Math.max(
+      buildEnd + 1,
+      Math.round(
+        count * 0.65
+      )
+    );
+
+
+  const resetEnd =
+    Math.max(
+      peakEnd + 1,
+      Math.round(
+        count * 0.78
+      )
+    );
+
+
+  const sections = [
+
+    {
+      name:
+        "Opening",
+
+      start:
+        0,
+
+      end:
+        openingEnd,
+
+      description:
+        "Establish the sound of the set and leave room for the energy to grow."
+    },
+
+    {
+      name:
+        "Build",
+
+      start:
+        openingEnd,
+
+      end:
+        buildEnd,
+
+      description:
+        "Increase momentum while keeping the BPM and musical flow controlled."
+    },
+
+    {
+      name:
+        "First Peak",
+
+      start:
+        buildEnd,
+
+      end:
+        peakEnd,
+
+      description:
+        "Deliver the first major payoff and begin using stronger tracks."
+    },
+
+    {
+      name:
+        "Reset",
+
+      start:
+        peakEnd,
+
+      end:
+        resetEnd,
+
+      description:
+        "Create some breathing room before the final push."
+    },
+
+    {
+      name:
+        "Final Peak / Closer",
+
+      start:
+        resetEnd,
+
+      end:
+        count,
+
+      description:
+        "Finish with the strongest and most memorable section of the set."
+    }
+
+  ];
+
+
+  results.innerHTML = `
+
+    <h2>
+      Your Set Plan
+    </h2>
+
+
+    <p class="request">
+
+      ${
+        settings.instructions
+          ? escapeHTML(
+              settings.instructions
+            )
+          : "No additional instructions provided."
+      }
+
+    </p>
+
+
+    <div class="summary-grid">
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Genre
+        </div>
+
+        <div class="summary-value">
+          ${escapeHTML(
+            settings.genre
+          )}
+        </div>
+
+      </div>
+
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Length
+        </div>
+
+        <div class="summary-value">
+          ${settings.length} min
+        </div>
+
+      </div>
+
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          BPM Range
+        </div>
+
+        <div class="summary-value">
+          ${settings.startingBpm}–${settings.endingBpm}
+        </div>
+
+      </div>
+
+
+      <div class="summary-box">
+
+        <div class="summary-label">
+          Tracks
+        </div>
+
+        <div class="summary-value">
+          ${tracks.length}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    ${sections.map(
+      function(section) {
+
+        const sectionTracks =
+          tracks.slice(
+            section.start,
+            section.end
+          );
+
+
+        if (
+          !sectionTracks.length
+        ) return "";
+
+
+        return `
+
+          <div class="set-section">
+
+            <span class="time">
+              ${section.name.toUpperCase()}
+            </span>
+
+            <h3>
+              ${section.name}
+            </h3>
+
+            <p>
+              ${section.description}
+            </p>
+
+
+            ${sectionTracks.map(
+              function(track,index) {
+
+                const actualNumber =
+                  section.start +
+                  index +
+                  1;
+
+
+                return `
+
+                  <div class="track-row">
+
+                    <div class="track-number">
+
+                      TRACK ${actualNumber}
+
+                    </div>
+
+
+                    <div class="track-title">
+
+                      ${escapeHTML(
+                        track.title
+                      )}
+
+                    </div>
+
+
+                    <div class="track-artist">
+
+                      ${escapeHTML(
+                        track.artist
+                      )}
+
+                    </div>
+
+
+                    <div class="track-meta">
+
+                      <span class="pill">
+
+                        ${
+                          track.bpm
+                            ? track.bpm +
+                              " BPM"
+                            : "BPM unknown"
+                        }
+
+                      </span>
+
+
+                      ${
+                        track.key
+                          ? `
+
+                            <span class="pill">
+
+                              ${escapeHTML(
+                                track.key
+                              )}
+
+                            </span>
+
+                          `
+                          : ""
+                      }
+
+
+                      ${
+                        track.genre
+                          ? `
+
+                            <span class="pill">
+
+                              ${escapeHTML(
+                                track.genre
+                              )}
+
+                            </span>
+
+                          `
+                          : ""
+                      }
+
+
+                      <span class="pill">
+
+                        Target:
+                        ${track.targetBpm}
+                        BPM
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                `;
+
+              }
+            ).join("")}
+
+          </div>
+
+        `;
+
+      }
+    ).join("")}
+
+
+    <div class="set-section">
+
+      <h3>
+        Set Strategy
+      </h3>
+
+      <p>
+
+        ${escapeHTML(
+          settings.energy
+        )}
+        energy for a
+        ${escapeHTML(
+          settings.venue
+        )}
+        setting.
+
+        This version prioritizes tracks using BPM proximity, genre information and rating data available in your library.
+
+      </p>
+
+    </div>
+
+  `;
+
+
+  results.scrollIntoView({
+    behavior:
+      "smooth"
+  });
+
+}
+
+</script>
+
 </body>
 </html>
