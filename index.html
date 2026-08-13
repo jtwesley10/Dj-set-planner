@@ -61,7 +61,7 @@
 
     .mode-switch {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3,1fr);
       gap: 12px;
       margin-bottom: 24px;
     }
@@ -401,6 +401,113 @@
       margin-top: 22px;
     }
 
+
+    .discovery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .api-key-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .api-key-row button {
+      white-space: nowrap;
+    }
+
+    .discovery-status {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 11px;
+      border: 1px solid #30303b;
+      background: #101015;
+      color: #aaaab5;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .discovery-status.show {
+      display: block;
+    }
+
+    .discovery-status.error {
+      display: block;
+      border-color: #944646;
+      color: #e7b0b0;
+    }
+
+    .discovery-results {
+      margin-top: 22px;
+    }
+
+    .discovery-track {
+      padding: 17px;
+      margin-top: 12px;
+      background: #0f0f14;
+      border: 1px solid #292933;
+      border-radius: 13px;
+    }
+
+    .discovery-rank {
+      color: #9a6df4;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .discovery-title {
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .discovery-artist {
+      color: #a2a2ae;
+      margin-top: 3px;
+      margin-bottom: 10px;
+    }
+
+    .discovery-why {
+      margin-top: 11px;
+      color: #9f9faa;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .link-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 13px;
+    }
+
+    .link-button {
+      display: inline-block;
+      padding: 9px 12px;
+      border-radius: 9px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      background: #24242e;
+      border: 1px solid #393946;
+    }
+
+    .link-button.primary {
+      background: linear-gradient(135deg,#7c3aed,#2563eb);
+      border: 0;
+    }
+
+    .key-note {
+      margin-top: 8px;
+      color: #777785;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     @media(max-width:700px) {
       h1 {
         font-size: 37px;
@@ -409,7 +516,9 @@
       .form-grid,
       .summary-grid,
       .mode-switch,
-      .result-actions {
+      .result-actions,
+      .discovery-grid,
+      .api-key-row {
         grid-template-columns: 1fr;
       }
 
@@ -436,12 +545,12 @@
 
 <main class="app">
 
-  <div class="logo">DJ SET COPILOT — V7</div>
+  <div class="logo">DJ SET COPILOT — V8</div>
 
   <h1>Build it. Then make it better.</h1>
 
   <p class="subtitle">
-    Plan new sets from your Rekordbox library or analyze playlists you've already built.
+    Plan sets from your Rekordbox library, analyze playlists you already built, or discover music you do not own yet.
   </p>
 
 
@@ -549,6 +658,14 @@
       onclick="switchMode('doctor')"
     >
       🩺 SET DOCTOR
+    </button>
+
+    <button
+      id="discovery-mode-button"
+      class="mode-button"
+      onclick="switchMode('discovery')"
+    >
+      🔎 DISCOVER MUSIC
     </button>
 
   </div>
@@ -692,6 +809,107 @@
 
   </section>
 
+
+  <!-- DISCOVERY MODE -->
+
+  <section
+    id="discovery-mode"
+    class="mode-panel"
+  >
+
+    <div class="card">
+
+      <h2>Discover New Music</h2>
+
+      <p class="hint">
+        Use tracks you already like as seeds. The app asks Last.fm for similar music, then removes tracks already found in your Rekordbox collection.
+      </p>
+
+      <div class="form-group">
+        <label>Last.fm API Key</label>
+        <div class="api-key-row">
+          <input
+            id="lastfm-api-key"
+            type="password"
+            placeholder="Paste your free Last.fm API key"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="secondary"
+            onclick="toggleApiKeyVisibility()"
+          >
+            Show / Hide
+          </button>
+        </div>
+        <div class="check">
+          <input id="remember-api-key" type="checkbox" checked />
+          <span>Remember this API key in this browser</span>
+        </div>
+        <p class="key-note">
+          For this personal version, the key is used only for read-only Last.fm discovery calls. Get a free API account at last.fm/api. Do not paste your Last.fm shared secret here.
+        </p>
+      </div>
+
+      <div class="discovery-grid" style="margin-top:20px;">
+
+        <div class="form-group">
+          <label>Seed Source</label>
+          <select id="discovery-source">
+            <option value="current-set">Current Generated Set</option>
+            <option value="selected-source">Selected Rekordbox Music Source</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Seed Tracks</label>
+          <select id="discovery-seed-count">
+            <option value="3">3 seed tracks</option>
+            <option value="5" selected>5 seed tracks</option>
+            <option value="7">7 seed tracks</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Recommendations</label>
+          <select id="discovery-result-count">
+            <option value="10">10 tracks</option>
+            <option value="15" selected>15 tracks</option>
+            <option value="25">25 tracks</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Genre Signal</label>
+          <select id="discovery-genre">
+            <option value="AUTO">Use Build-a-Set genre</option>
+            <option>House</option>
+            <option>Tech House</option>
+            <option>Melodic House</option>
+            <option>Dubstep</option>
+            <option>Riddim</option>
+            <option>Drum & Bass</option>
+            <option>Open Format</option>
+          </select>
+        </div>
+
+      </div>
+
+      <button
+        id="discover-button"
+        class="full-button"
+        onclick="discoverNewMusic()"
+      >
+        Discover Music I Don't Have
+      </button>
+
+      <div id="discovery-status" class="discovery-status"></div>
+      <div id="discovery-results" class="discovery-results"></div>
+
+    </div>
+
+  </section>
+
 </main>
 
 
@@ -710,6 +928,8 @@ let currentSettings = null;
 let lockedPositions = new Set();
 
 let doctorSet = [];
+
+let discoveryResults = [];
 
 
 /* ===================================================
@@ -2931,7 +3151,7 @@ function exportPlaylistXML(
 
   <PRODUCT
     Name="DJ Set Copilot"
-    Version="7.0"
+    Version="8.0"
     Company="DJ Set Copilot"
   />
 
@@ -3012,6 +3232,812 @@ function exportPlaylistXML(
     url
   );
 }
+
+
+/* ===================================================
+   NEW MUSIC DISCOVERY — LAST.FM
+=================================================== */
+
+function toggleApiKeyVisibility() {
+
+  const input =
+    document.getElementById(
+      "lastfm-api-key"
+    );
+
+  input.type =
+    input.type === "password"
+      ? "text"
+      : "password";
+}
+
+
+function loadSavedLastFmKey() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        "dj-set-copilot-lastfm-key"
+      );
+
+    if (saved) {
+
+      document
+        .getElementById(
+          "lastfm-api-key"
+        )
+        .value = saved;
+    }
+
+  }
+  catch(error) {
+    // Local storage can be unavailable in some private-browser modes.
+  }
+}
+
+
+function saveLastFmKeyIfRequested(key) {
+
+  try {
+
+    if (
+      document
+        .getElementById(
+          "remember-api-key"
+        )
+        .checked
+    ) {
+
+      localStorage.setItem(
+        "dj-set-copilot-lastfm-key",
+        key
+      );
+
+    }
+    else {
+
+      localStorage.removeItem(
+        "dj-set-copilot-lastfm-key"
+      );
+    }
+
+  }
+  catch(error) {
+    // Discovery still works even if the browser blocks local storage.
+  }
+}
+
+
+function setDiscoveryStatus(message, isError = false) {
+
+  const status =
+    document.getElementById(
+      "discovery-status"
+    );
+
+  status.className =
+    isError
+      ? "discovery-status error"
+      : "discovery-status show";
+
+  status.textContent = message;
+}
+
+
+function normalizedDiscoveryKey(artist, title) {
+
+  return (
+    String(artist || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g," ")
+    +
+    "|||"
+    +
+    String(title || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g," ")
+  );
+}
+
+
+function getDiscoverySeedPool() {
+
+  const source =
+    document
+      .getElementById(
+        "discovery-source"
+      )
+      .value;
+
+  if (
+    source === "current-set"
+  ) {
+
+    if (!currentSet.length) {
+
+      throw new Error(
+        "Build a set first, or change Seed Source to Selected Rekordbox Music Source."
+      );
+    }
+
+    return [...currentSet];
+  }
+
+  const selected =
+    getFilteredTracks()
+      .usable;
+
+  if (!selected.length) {
+
+    throw new Error(
+      "Choose a Rekordbox music source with usable tracks first."
+    );
+  }
+
+  return selected;
+}
+
+
+function chooseEvenlySpacedSeeds(pool, count) {
+
+  if (
+    pool.length <= count
+  ) {
+    return [...pool];
+  }
+
+  const seeds = [];
+  const used = new Set();
+
+  for (
+    let i = 0;
+    i < count;
+    i++
+  ) {
+
+    const position =
+      Math.round(
+        i
+        *
+        (pool.length - 1)
+        /
+        Math.max(1,count - 1)
+      );
+
+    const track =
+      pool[position];
+
+    if (
+      track
+      &&
+      !used.has(
+        duplicateKey(track)
+      )
+    ) {
+
+      used.add(
+        duplicateKey(track)
+      );
+
+      seeds.push(track);
+    }
+  }
+
+  return seeds;
+}
+
+
+async function lastFmRequest(parameters) {
+
+  const query =
+    new URLSearchParams({
+      ...parameters,
+      format:"json"
+    });
+
+  const response =
+    await fetch(
+      "https://ws.audioscrobbler.com/2.0/?"
+      +
+      query.toString()
+    );
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Last.fm returned HTTP "
+      +
+      response.status
+      +
+      "."
+    );
+  }
+
+  const data =
+    await response.json();
+
+  if (data.error) {
+
+    throw new Error(
+      data.message
+      ||
+      "Last.fm returned an API error."
+    );
+  }
+
+  return data;
+}
+
+
+function wait(milliseconds) {
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        milliseconds
+      )
+  );
+}
+
+
+async function discoverNewMusic() {
+
+  const button =
+    document.getElementById(
+      "discover-button"
+    );
+
+  const resultsBox =
+    document.getElementById(
+      "discovery-results"
+    );
+
+  resultsBox.innerHTML = "";
+
+  const apiKey =
+    document
+      .getElementById(
+        "lastfm-api-key"
+      )
+      .value
+      .trim();
+
+  if (!apiKey) {
+
+    setDiscoveryStatus(
+      "Paste your Last.fm API key first.",
+      true
+    );
+
+    return;
+  }
+
+  if (!fullLibrary.length) {
+
+    setDiscoveryStatus(
+      "Upload your Rekordbox XML first so the app can remove music you already own.",
+      true
+    );
+
+    return;
+  }
+
+  saveLastFmKeyIfRequested(
+    apiKey
+  );
+
+  let seeds;
+
+  try {
+
+    const pool =
+      getDiscoverySeedPool();
+
+    const requestedSeedCount =
+      Number(
+        document
+          .getElementById(
+            "discovery-seed-count"
+          )
+          .value
+      );
+
+    seeds =
+      chooseEvenlySpacedSeeds(
+        pool,
+        requestedSeedCount
+      );
+
+  }
+  catch(error) {
+
+    setDiscoveryStatus(
+      error.message,
+      true
+    );
+
+    return;
+  }
+
+  if (!seeds.length) {
+
+    setDiscoveryStatus(
+      "I could not find suitable seed tracks.",
+      true
+    );
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent =
+    "Digging for new music...";
+
+  setDiscoveryStatus(
+    "Using "
+    +
+    seeds.length
+    +
+    " seed tracks and filtering against "
+    +
+    fullLibrary.length
+    +
+    " Rekordbox tracks..."
+  );
+
+  const ownedKeys =
+    new Set(
+      fullLibrary.map(
+        track =>
+          normalizedDiscoveryKey(
+            track.artist,
+            track.title
+          )
+      )
+    );
+
+  const candidates =
+    new Map();
+
+  try {
+
+    for (
+      let seedIndex = 0;
+      seedIndex < seeds.length;
+      seedIndex++
+    ) {
+
+      const seed =
+        seeds[seedIndex];
+
+      const data =
+        await lastFmRequest({
+          method:"track.getsimilar",
+          artist:seed.artist,
+          track:seed.title,
+          api_key:apiKey,
+          autocorrect:"1",
+          limit:"15"
+        });
+
+      const similar =
+        data.similartracks
+        &&
+        data.similartracks.track
+          ? data.similartracks.track
+          : [];
+
+      similar.forEach(item => {
+
+        const artist =
+          item.artist
+            ? (
+                item.artist.name
+                ||
+                item.artist["#text"]
+                ||
+                "Unknown Artist"
+              )
+            : "Unknown Artist";
+
+        const title =
+          item.name
+          ||
+          "Unknown Track";
+
+        const key =
+          normalizedDiscoveryKey(
+            artist,
+            title
+          );
+
+        if (
+          ownedKeys.has(key)
+        ) {
+          return;
+        }
+
+        const match =
+          Number(item.match)
+          ||
+          0;
+
+        if (!candidates.has(key)) {
+
+          candidates.set(key,{
+            artist,
+            title,
+            lastFmUrl:item.url || "",
+            score:0,
+            appearances:0,
+            seedNames:new Set(),
+            bestMatch:0,
+            source:"similar"
+          });
+        }
+
+        const candidate =
+          candidates.get(key);
+
+        candidate.score +=
+          match * 100;
+
+        candidate.appearances++;
+
+        candidate.bestMatch =
+          Math.max(
+            candidate.bestMatch,
+            match
+          );
+
+        candidate.seedNames.add(
+          seed.artist
+          +
+          " — "
+          +
+          seed.title
+        );
+      });
+
+      // Keep requests gentle rather than firing several calls at once.
+      if (
+        seedIndex
+        <
+        seeds.length - 1
+      ) {
+        await wait(300);
+      }
+    }
+
+    let genre =
+      document
+        .getElementById(
+          "discovery-genre"
+        )
+        .value;
+
+    if (
+      genre === "AUTO"
+    ) {
+      genre =
+        document
+          .getElementById(
+            "genre"
+          )
+          .value;
+    }
+
+    // Add a small genre-based discovery pool when a specific genre is selected.
+    if (
+      genre
+      &&
+      genre !== "Open Format"
+    ) {
+
+      await wait(300);
+
+      const tagData =
+        await lastFmRequest({
+          method:"tag.gettoptracks",
+          tag:genre,
+          api_key:apiKey,
+          limit:"25"
+        });
+
+      const tagged =
+        tagData.tracks
+        &&
+        tagData.tracks.track
+          ? tagData.tracks.track
+          : [];
+
+      tagged.forEach(item => {
+
+        const artist =
+          item.artist
+            ? (
+                item.artist.name
+                ||
+                item.artist["#text"]
+                ||
+                "Unknown Artist"
+              )
+            : "Unknown Artist";
+
+        const title =
+          item.name
+          ||
+          "Unknown Track";
+
+        const key =
+          normalizedDiscoveryKey(
+            artist,
+            title
+          );
+
+        if (
+          ownedKeys.has(key)
+        ) {
+          return;
+        }
+
+        if (!candidates.has(key)) {
+
+          candidates.set(key,{
+            artist,
+            title,
+            lastFmUrl:item.url || "",
+            score:15,
+            appearances:0,
+            seedNames:new Set(),
+            bestMatch:0,
+            source:"genre"
+          });
+        }
+        else {
+          candidates.get(key).score += 15;
+        }
+      });
+    }
+
+    const requestedResults =
+      Number(
+        document
+          .getElementById(
+            "discovery-result-count"
+          )
+          .value
+      );
+
+    discoveryResults =
+      Array.from(
+        candidates.values()
+      )
+      .map(item => ({
+        ...item,
+        seedNames:
+          Array.from(
+            item.seedNames
+          ),
+        score:
+          item.score
+          +
+          item.appearances * 12
+      }))
+      .sort(
+        (a,b) =>
+          b.score - a.score
+      )
+      .slice(
+        0,
+        requestedResults
+      );
+
+    if (!discoveryResults.length) {
+
+      setDiscoveryStatus(
+        "Last.fm returned results, but they were all already in your Rekordbox library. Try a different seed source or genre.",
+        true
+      );
+
+      return;
+    }
+
+    setDiscoveryStatus(
+      "Found "
+      +
+      discoveryResults.length
+      +
+      " recommendations that are not exact artist/title matches in your Rekordbox collection."
+    );
+
+    renderDiscoveryResults(
+      seeds,
+      genre
+    );
+
+  }
+  catch(error) {
+
+    setDiscoveryStatus(
+      "Discovery failed: "
+      +
+      error.message
+      +
+      " If the key is valid but the browser blocks the request, we can move the Last.fm call into a free Cloudflare Worker later.",
+      true
+    );
+
+  }
+  finally {
+
+    button.disabled = false;
+    button.textContent =
+      "Discover Music I Don't Have";
+  }
+}
+
+
+function renderDiscoveryResults(seeds, genre) {
+
+  const box =
+    document.getElementById(
+      "discovery-results"
+    );
+
+  box.innerHTML = `
+
+    <div class="section">
+
+      <div class="section-name">
+        Discovery Seeds
+      </div>
+
+      <h3 style="margin-top:8px;">
+        ${escapeHTML(genre || "Music discovery")}
+      </h3>
+
+      <p class="hint">
+        ${seeds.map(
+          seed =>
+            escapeHTML(
+              seed.artist
+              +
+              " — "
+              +
+              seed.title
+            )
+        ).join(" · ")}
+      </p>
+
+    </div>
+
+    ${discoveryResults.map(
+      (track,index) => {
+
+        const youtubeQuery =
+          encodeURIComponent(
+            track.artist
+            +
+            " "
+            +
+            track.title
+          );
+
+        const similarity =
+          Math.round(
+            track.bestMatch * 100
+          );
+
+        const seedReason =
+          track.seedNames.length
+            ? "Similar to "
+              +
+              track.seedNames
+                .slice(0,2)
+                .join(" and ")
+            : "Surfaced from the selected genre";
+
+        return `
+
+          <div class="discovery-track">
+
+            <div class="discovery-rank">
+              DISCOVERY ${index + 1}
+            </div>
+
+            <div class="discovery-title">
+              ${escapeHTML(track.title)}
+            </div>
+
+            <div class="discovery-artist">
+              ${escapeHTML(track.artist)}
+            </div>
+
+            <div class="meta">
+
+              ${
+                similarity > 0
+                  ? `
+                    <span class="pill good">
+                      ${similarity}% seed similarity
+                    </span>
+                  `
+                  : `
+                    <span class="pill">
+                      Genre discovery
+                    </span>
+                  `
+              }
+
+              ${
+                track.appearances > 1
+                  ? `
+                    <span class="pill">
+                      Matched ${track.appearances} seeds
+                    </span>
+                  `
+                  : ""
+              }
+
+              <span class="pill">
+                Not in Rekordbox
+              </span>
+
+            </div>
+
+            <div class="discovery-why">
+              ${escapeHTML(seedReason)}. Last.fm similarity is based on listening data; this app then removes exact artist/title matches already present in your imported Rekordbox collection.
+            </div>
+
+            <div class="link-actions">
+
+              <a
+                class="link-button primary"
+                href="https://www.youtube.com/results?search_query=${youtubeQuery}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Find on YouTube
+              </a>
+
+              ${
+                track.lastFmUrl
+                  ? `
+                    <a
+                      class="link-button"
+                      href="${escapeHTML(track.lastFmUrl)}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open on Last.fm
+                    </a>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    ).join("")}
+
+  `;
+
+  box.scrollIntoView({
+    behavior:"smooth"
+  });
+}
+
+
+loadSavedLastFmKey();
 
 
 /* ===================================================
