@@ -545,7 +545,7 @@
 
 <main class="app">
 
-  <div class="logo">DJ SET COPILOT — V8</div>
+  <div class="logo">DJ SET COPILOT — V8.1</div>
 
   <h1>Build it. Then make it better.</h1>
 
@@ -3151,7 +3151,7 @@ function exportPlaylistXML(
 
   <PRODUCT
     Name="DJ Set Copilot"
-    Version="8.0"
+    Version="8.1"
     Company="DJ Set Copilot"
   />
 
@@ -3430,45 +3430,80 @@ function chooseEvenlySpacedSeeds(pool, count) {
 }
 
 
-async function lastFmRequest(parameters) {
+function lastFmRequest(parameters) {
 
-  const query =
-    new URLSearchParams({
-      ...parameters,
-      format:"json"
-    });
+  return new Promise((resolve,reject) => {
 
-  const response =
-    await fetch(
+    const callbackName =
+      "lastFmCallback_"
+      + Date.now()
+      + "_"
+      + Math.random()
+        .toString(36)
+        .slice(2);
+
+    const query =
+      new URLSearchParams({
+        ...parameters,
+        format:"json",
+        callback:callbackName
+      });
+
+    const script =
+      document.createElement("script");
+
+    const timeout =
+      setTimeout(() => {
+        cleanup();
+        reject(
+          new Error(
+            "Last.fm did not respond in time."
+          )
+        );
+      },15000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      script.remove();
+    }
+
+    window[callbackName] =
+      function(data) {
+
+        cleanup();
+
+        if (data && data.error) {
+          const apiError = new Error(
+            data.message
+            ||
+            "Last.fm returned an API error."
+          );
+          apiError.code = Number(data.error);
+          reject(apiError);
+          return;
+        }
+
+        resolve(data || {});
+      };
+
+    script.onerror =
+      function() {
+        cleanup();
+        reject(
+          new Error(
+            "The browser could not reach Last.fm."
+          )
+        );
+      };
+
+    script.src =
       "https://ws.audioscrobbler.com/2.0/?"
       +
-      query.toString()
-    );
+      query.toString();
 
-  if (!response.ok) {
-
-    throw new Error(
-      "Last.fm returned HTTP "
-      +
-      response.status
-      +
-      "."
-    );
-  }
-
-  const data =
-    await response.json();
-
-  if (data.error) {
-
-    throw new Error(
-      data.message
-      ||
-      "Last.fm returned an API error."
-    );
-  }
-
-  return data;
+    document.body.appendChild(script);
+  });
 }
 
 
@@ -3614,15 +3649,41 @@ async function discoverNewMusic() {
       const seed =
         seeds[seedIndex];
 
-      const data =
-        await lastFmRequest({
-          method:"track.getsimilar",
-          artist:seed.artist,
-          track:seed.title,
-          api_key:apiKey,
-          autocorrect:"1",
-          limit:"15"
-        });
+      let data = null;
+
+      try {
+        data =
+          await lastFmRequest({
+            method:"track.getsimilar",
+            artist:seed.artist,
+            track:seed.title,
+            api_key:apiKey,
+            autocorrect:"1",
+            limit:"15"
+          });
+      }
+      catch(seedError) {
+        // A Rekordbox track may not exist in Last.fm under the exact same
+        // artist/title (remixes, bootlegs, edits, local files, etc.).
+        // Skip that seed instead of failing the entire discovery run.
+        if (
+          seedError.code === 10
+          || seedError.code === 26
+          || seedError.code === 29
+        ) {
+          throw seedError;
+        }
+
+        console.warn(
+          "Skipping Last.fm seed:",
+          seed.artist,
+          "—",
+          seed.title,
+          seedError.message
+        );
+
+        continue;
+      }
 
       const similar =
         data.similartracks
@@ -3740,13 +3801,34 @@ async function discoverNewMusic() {
 
       await wait(300);
 
-      const tagData =
-        await lastFmRequest({
-          method:"tag.gettoptracks",
-          tag:genre,
-          api_key:apiKey,
-          limit:"25"
-        });
+      let tagData = {};
+
+      try {
+        tagData =
+          await lastFmRequest({
+            method:"tag.gettoptracks",
+            tag:genre,
+            api_key:apiKey,
+            limit:"25"
+          });
+      }
+      catch(tagError) {
+        // Genre fallback is helpful, but it should not erase successful
+        // seed-track recommendations if Last.fm does not recognize the tag.
+        if (
+          tagError.code === 10
+          || tagError.code === 26
+          || tagError.code === 29
+        ) {
+          throw tagError;
+        }
+
+        console.warn(
+          "Skipping Last.fm genre fallback:",
+          genre,
+          tagError.message
+        );
+      }
 
       const tagged =
         tagData.tracks
@@ -3840,7 +3922,7 @@ async function discoverNewMusic() {
     if (!discoveryResults.length) {
 
       setDiscoveryStatus(
-        "Last.fm returned results, but they were all already in your Rekordbox library. Try a different seed source or genre.",
+        "No new recommendations were found from those seeds. Some Rekordbox edits, bootlegs, or remixes may not exist in Last.fm under the exact same name. Try a different playlist, use fewer seed tracks, or choose a broader genre.",
         true
       );
 
