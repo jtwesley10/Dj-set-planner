@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DJ Set Planner</title>
+  <title>DJ Set Copilot</title>
 
   <style>
     * {
@@ -26,11 +26,11 @@
     }
 
     .logo {
-      font-size: 14px;
-      color: #a6a6b0;
-      margin-bottom: 24px;
+      font-size: 13px;
+      color: #9b9baa;
       text-transform: uppercase;
       letter-spacing: 2px;
+      margin-bottom: 22px;
     }
 
     h1 {
@@ -44,10 +44,10 @@
     }
 
     .subtitle {
-      font-size: 20px;
       color: #b5b5c0;
-      margin-bottom: 36px;
+      font-size: 19px;
       line-height: 1.5;
+      margin-bottom: 30px;
     }
 
     .card {
@@ -55,14 +55,46 @@
       border: 1px solid #2a2a35;
       border-radius: 18px;
       padding: 28px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
       margin-bottom: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.3);
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .mode-button {
+      padding: 18px;
+      background: #17171e;
+      color: #aaaab5;
+      border: 1px solid #30303c;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .mode-button.active {
+      color: white;
+      border-color: #7c3aed;
+      background: #211832;
+    }
+
+    .mode-panel {
+      display: none;
+    }
+
+    .mode-panel.active {
+      display: block;
     }
 
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 18px;
     }
 
     .form-group {
@@ -75,22 +107,21 @@
     }
 
     label {
-      font-size: 15px;
-      margin-bottom: 8px;
+      font-size: 14px;
       font-weight: bold;
-      color: #f1f1f5;
+      margin-bottom: 8px;
     }
 
     input,
     select,
     textarea {
       width: 100%;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 11px;
       border: 1px solid #3a3a47;
       background: #0f0f14;
       color: white;
-      padding: 14px;
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
     }
 
@@ -101,78 +132,76 @@
     }
 
     textarea {
-      min-height: 120px;
+      min-height: 115px;
       resize: vertical;
     }
 
     input[type="file"] {
-      padding: 18px;
       border-style: dashed;
-      cursor: pointer;
+      padding: 18px;
     }
 
     button {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
+      border: 0;
+      border-radius: 11px;
+      padding: 14px 16px;
+      font-size: 15px;
       font-weight: bold;
       cursor: pointer;
-      background: linear-gradient(135deg, #7c3aed, #2563eb);
       color: white;
+      background: linear-gradient(135deg,#7c3aed,#2563eb);
     }
 
     button:hover {
-      opacity: 0.92;
+      opacity: .92;
     }
 
     button:disabled {
+      opacity: .4;
       cursor: not-allowed;
-      opacity: 0.45;
     }
 
-    .secondary-button {
+    .full-button {
+      width: 100%;
+      margin-top: 22px;
+    }
+
+    .secondary {
       background: #24242e;
-      border: 1px solid #3a3a47;
-    }
-
-    .export-button {
-      background: linear-gradient(135deg, #2563eb, #0891b2);
+      border: 1px solid #393946;
     }
 
     .hint {
-      margin-top: 14px;
-      color: #777785;
-      font-size: 14px;
+      color: #80808c;
+      font-size: 13px;
       line-height: 1.5;
     }
 
     .status {
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 12px;
-      background: #0f0f14;
-      border: 1px solid #2a2a35;
-      color: #b5b5c0;
       display: none;
+      margin-top: 15px;
+      padding: 13px;
+      border-radius: 10px;
+      background: #101015;
+      color: #b5b5c0;
+      border: 1px solid #33333e;
     }
 
     .status.success {
       display: block;
-      border-color: #3b7d5b;
+      border-color: #367653;
     }
 
     .status.error {
       display: block;
-      border-color: #a04444;
+      border-color: #954747;
     }
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4,1fr);
       gap: 12px;
-      margin: 24px 0;
+      margin: 20px 0;
     }
 
     .summary-box {
@@ -183,247 +212,203 @@
     }
 
     .summary-label {
-      color: #777785;
-      font-size: 12px;
+      font-size: 11px;
+      color: #747480;
       text-transform: uppercase;
       margin-bottom: 6px;
     }
 
     .summary-value {
-      font-size: 17px;
       font-weight: bold;
-    }
-
-    .exclusion-breakdown {
-      margin-top: -10px;
-      margin-bottom: 20px;
-      color: #858591;
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: 17px;
     }
 
     .filter-box {
-      background: #101015;
-      border: 1px solid #2a2a35;
-      border-radius: 14px;
       padding: 18px;
-      margin-top: 22px;
+      border: 1px solid #292933;
+      background: #101015;
+      border-radius: 14px;
+      margin-top: 20px;
     }
 
-    .checkbox-row {
+    .check {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 12px;
+      color: #bdbdc7;
+      font-size: 14px;
     }
 
-    .checkbox-row input {
+    .check input {
       width: auto;
-    }
-
-    .checkbox-row label {
-      margin: 0;
-      font-weight: normal;
-      color: #c3c3cc;
-    }
-
-    .library-manager {
-      margin-top: 24px;
-    }
-
-    .library-list {
-      margin-top: 14px;
-      max-height: 420px;
-      overflow-y: auto;
-      border: 1px solid #2a2a35;
-      border-radius: 12px;
-    }
-
-    .library-track {
-      display: grid;
-      grid-template-columns: 34px 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 12px 14px;
-      border-bottom: 1px solid #25252e;
-    }
-
-    .library-track:last-child {
-      border-bottom: none;
-    }
-
-    .library-track input {
-      width: auto;
-    }
-
-    .library-track-title {
-      font-weight: bold;
-      margin-bottom: 3px;
-    }
-
-    .library-track-details {
-      color: #858591;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .excluded {
-      opacity: 0.42;
     }
 
     .pill {
-      background: #24242e;
-      border: 1px solid #353542;
-      padding: 5px 8px;
-      border-radius: 999px;
-      color: #bcbcc7;
-      font-size: 12px;
       display: inline-block;
+      border: 1px solid #393946;
+      background: #24242e;
+      color: #c3c3cc;
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 12px;
     }
 
     .pill.good {
-      border-color: #3b7d5b;
-      color: #8ed0ab;
+      color: #94deb1;
+      border-color: #3c7554;
     }
 
-    .set-section {
-      border-top: 1px solid #2a2a35;
-      padding: 24px 0;
+    .pill.warn {
+      color: #edc376;
+      border-color: #886832;
     }
 
-    .set-section:first-of-type {
-      border-top: none;
-    }
-
-    .set-section p {
-      color: #b5b5c0;
-      line-height: 1.6;
-    }
-
-    .track-row {
-      background: #0f0f14;
-      border: 1px solid #2a2a35;
-      border-radius: 14px;
-      padding: 16px;
+    .track {
       margin-top: 12px;
+      padding: 16px;
+      background: #0f0f14;
+      border: 1px solid #292933;
+      border-radius: 13px;
     }
 
-    .track-row.locked {
+    .track.locked {
       border-color: #7c3aed;
     }
 
-    .track-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
     .track-number {
-      color: #8b5cf6;
-      font-size: 12px;
+      color: #9a6df4;
+      font-size: 11px;
       font-weight: bold;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     .track-title {
       font-size: 17px;
       font-weight: bold;
-      margin-bottom: 4px;
     }
 
     .track-artist {
-      color: #a7a7b2;
+      margin-top: 3px;
       margin-bottom: 10px;
+      color: #a2a2ae;
     }
 
-    .track-meta {
+    .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
     }
 
-    .track-actions {
+    .actions {
       display: flex;
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 12px;
     }
 
-    .track-actions button {
+    .actions button {
       width: auto;
-      padding: 9px 13px;
-      font-size: 13px;
-      border-radius: 9px;
-      margin: 0;
-    }
-
-    .timing {
-      color: #777785;
-      font-size: 13px;
-      white-space: nowrap;
+      padding: 8px 11px;
+      font-size: 12px;
     }
 
     .transition {
-      margin: 12px 0 4px;
+      margin: 10px 0 4px;
       padding: 14px;
-      border-left: 3px solid #7c3aed;
       background: #13131a;
-      border-radius: 8px;
+      border-left: 3px solid #7c3aed;
+      border-radius: 7px;
+      color: #b5b5c0;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
-    .transition-title {
-      color: #a78bfa;
+    .section {
+      padding: 22px 0;
+      border-top: 1px solid #292933;
+    }
+
+    .section-name {
       font-size: 12px;
+      color: #986bf1;
       font-weight: bold;
       text-transform: uppercase;
+    }
+
+    .doctor-score {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 8px solid #7c3aed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .doctor-number {
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    .doctor-outof {
+      font-size: 12px;
+      color: #888895;
+    }
+
+    .doctor-item {
+      border: 1px solid #30303b;
+      border-radius: 13px;
+      padding: 16px;
+      margin-top: 12px;
+      background: #101015;
+    }
+
+    .doctor-item.good {
+      border-color: #356f50;
+    }
+
+    .doctor-item.warning {
+      border-color: #886832;
+    }
+
+    .doctor-item.bad {
+      border-color: #944646;
+    }
+
+    .doctor-item-title {
+      font-weight: bold;
       margin-bottom: 6px;
     }
 
-    .transition-text {
-      color: #b5b5c0;
+    .doctor-copy {
+      color: #aaaab5;
       line-height: 1.5;
       font-size: 14px;
     }
 
-    .time {
-      display: inline-block;
-      margin-bottom: 8px;
-      color: #8b5cf6;
+    .doctor-grade {
+      float: right;
       font-size: 13px;
       font-weight: bold;
-    }
-
-    .request {
-      color: #8f8f9c;
-      line-height: 1.5;
     }
 
     .result-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 24px;
+      gap: 10px;
+      margin-top: 22px;
     }
 
-    .export-note {
-      color: #777785;
-      font-size: 13px;
-      line-height: 1.5;
-      margin-top: 12px;
-    }
-
-    .small-note {
-      color: #777785;
-      font-size: 12px;
-      margin-top: 10px;
-    }
-
-    @media (max-width: 700px) {
+    @media(max-width:700px) {
       h1 {
-        font-size: 38px;
+        font-size: 37px;
       }
 
       .form-grid,
       .summary-grid,
+      .mode-switch,
       .result-actions {
         grid-template-columns: 1fr;
       }
@@ -432,29 +417,16 @@
         grid-column: auto;
       }
 
-      .library-track {
-        grid-template-columns: 34px 1fr;
-      }
-
-      .library-track > .pill {
-        display: none;
-      }
-
-      .track-top {
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .track-actions {
+      .actions {
         flex-direction: column;
       }
 
-      .track-actions button {
+      .actions button {
         width: 100%;
       }
 
       .card {
-        padding: 22px;
+        padding: 21px;
       }
     }
   </style>
@@ -464,152 +436,93 @@
 
 <main class="app">
 
-  <div class="logo">DJ Set Planner</div>
+  <div class="logo">DJ SET COPILOT — V7</div>
 
-  <h1>Build better sets.</h1>
+  <h1>Build it. Then make it better.</h1>
 
   <p class="subtitle">
-    Turn your Rekordbox library into an intelligently ordered DJ set with BPM flow,
-    harmonic compatibility, energy progression, and transition guidance.
+    Plan new sets from your Rekordbox library or analyze playlists you've already built.
   </p>
 
 
-  <!-- ================= LIBRARY ================= -->
+  <!-- LIBRARY -->
 
   <section class="card">
 
-    <h2>1. Import Rekordbox Library</h2>
+    <h2>1. Load Rekordbox</h2>
 
     <p class="hint">
-      Upload your Rekordbox XML export. Your library is processed locally in your browser.
+      Upload your Rekordbox XML export. Everything is processed locally in your browser.
     </p>
 
     <input
-      type="file"
       id="library-file"
+      type="file"
       accept=".xml,text/xml"
     />
 
-    <div id="library-status" class="status"></div>
+    <div
+      id="library-status"
+      class="status"
+    ></div>
 
-    <div id="library-controls" style="display:none;">
+    <div
+      id="library-controls"
+      style="display:none;"
+    >
 
       <div class="summary-grid">
 
         <div class="summary-box">
-          <div class="summary-label">Collection</div>
-          <div class="summary-value" id="collection-count">0</div>
+          <div class="summary-label">Tracks</div>
+          <div id="collection-count" class="summary-value">0</div>
         </div>
 
         <div class="summary-box">
           <div class="summary-label">Available</div>
-          <div class="summary-value" id="available-count">0</div>
+          <div id="available-count" class="summary-value">0</div>
         </div>
 
         <div class="summary-box">
           <div class="summary-label">Excluded</div>
-          <div class="summary-value" id="excluded-count">0</div>
+          <div id="excluded-count" class="summary-value">0</div>
         </div>
 
         <div class="summary-box">
           <div class="summary-label">Playlists</div>
-          <div class="summary-value" id="playlist-count">0</div>
+          <div id="playlist-count" class="summary-value">0</div>
         </div>
 
       </div>
-
-      <div
-        id="exclusion-breakdown"
-        class="exclusion-breakdown"
-      ></div>
-
 
       <div class="filter-box">
 
-        <div class="form-group">
+        <label>
+          Music Source
+        </label>
 
-          <label for="playlist-select">
-            Music Source
-          </label>
+        <select id="playlist-select">
+          <option value="ALL">
+            Entire Collection
+          </option>
+        </select>
 
-          <select id="playlist-select">
-            <option value="ALL">
-              Entire Collection
-            </option>
-          </select>
-
+        <div class="check">
+          <input id="filter-samples" type="checkbox" checked />
+          <span>Exclude sample/demo audio</span>
         </div>
 
-
-        <div class="checkbox-row">
-
-          <input
-            type="checkbox"
-            id="filter-samples"
-            checked
-          />
-
-          <label for="filter-samples">
-            Exclude likely sample / demo audio
-          </label>
-
+        <div class="check">
+          <input id="filter-missing" type="checkbox" checked />
+          <span>Exclude missing file locations</span>
         </div>
 
-
-        <div class="checkbox-row">
-
-          <input
-            type="checkbox"
-            id="filter-missing"
-            checked
-          />
-
-          <label for="filter-missing">
-            Exclude tracks without a file location
-          </label>
-
+        <div class="check">
+          <input id="filter-duplicates" type="checkbox" checked />
+          <span>Exclude duplicate artist + title tracks</span>
         </div>
 
-
-        <div class="checkbox-row">
-
-          <input
-            type="checkbox"
-            id="filter-duplicates"
-            checked
-          />
-
-          <label for="filter-duplicates">
-            Exclude duplicate tracks with the same artist and title
-          </label>
-
-        </div>
-
-      </div>
-
-
-      <div class="library-manager">
-
-        <h3>Library Manager</h3>
-
-        <p class="hint">
-          Uncheck tracks you don't want the planner to use.
-        </p>
-
-        <input
-          type="text"
-          id="library-search"
-          placeholder="Search tracks or artists..."
-        />
-
-        <div
-          id="library-list"
-          class="library-list"
-        ></div>
-
-        <p class="small-note">
-          Showing up to 200 matching tracks.
-        </p>
+        <p id="exclusion-info" class="hint"></p>
 
       </div>
 
@@ -618,123 +531,164 @@
   </section>
 
 
-  <!-- ================= SET BRIEF ================= -->
+  <!-- MODES -->
 
-  <section class="card">
+  <div class="mode-switch">
 
-    <h2>2. Create Your Set Brief</h2>
+    <button
+      id="build-mode-button"
+      class="mode-button active"
+      onclick="switchMode('build')"
+    >
+      🎧 BUILD A SET
+    </button>
 
-    <div class="form-grid">
+    <button
+      id="doctor-mode-button"
+      class="mode-button"
+      onclick="switchMode('doctor')"
+    >
+      🩺 SET DOCTOR
+    </button>
 
-      <div class="form-group">
+  </div>
 
-        <label for="genre">
-          Genre
-        </label>
 
-        <select id="genre">
-          <option>House</option>
-          <option>Tech House</option>
-          <option>Melodic House</option>
-          <option>Dubstep</option>
-          <option>Riddim</option>
-          <option>Drum & Bass</option>
-          <option>Open Format</option>
-        </select>
+  <!-- BUILD MODE -->
+
+  <section
+    id="build-mode"
+    class="mode-panel active"
+  >
+
+    <div class="card">
+
+      <h2>Build a Set</h2>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Genre</label>
+
+          <select id="genre">
+            <option>House</option>
+            <option>Tech House</option>
+            <option>Melodic House</option>
+            <option>Dubstep</option>
+            <option>Riddim</option>
+            <option>Drum & Bass</option>
+            <option>Open Format</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Set Length</label>
+
+          <select id="length">
+            <option value="30">30 minutes</option>
+            <option value="60" selected>60 minutes</option>
+            <option value="90">90 minutes</option>
+            <option value="120">120 minutes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Starting BPM</label>
+
+          <input
+            id="bpm"
+            type="number"
+            min="60"
+            max="200"
+            value="128"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Energy</label>
+
+          <select id="energy">
+            <option>Chill</option>
+            <option>Building</option>
+            <option selected>High</option>
+            <option>Aggressive</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Venue / Setting</label>
+
+          <select id="venue">
+            <option>Club</option>
+            <option>Festival</option>
+            <option>House Party</option>
+            <option>Coffee Shop</option>
+            <option>Livestream</option>
+            <option>After Party</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Set Intent</label>
+
+          <textarea
+            id="instructions"
+            placeholder="Example: Start hard but save my biggest tracks for the last 15 minutes. Give me one short reset in the middle."
+          ></textarea>
+        </div>
 
       </div>
 
-
-      <div class="form-group">
-
-        <label for="length">
-          Set Length
-        </label>
-
-        <select id="length">
-          <option value="30">30 minutes</option>
-          <option value="60" selected>60 minutes</option>
-          <option value="90">90 minutes</option>
-          <option value="120">120 minutes</option>
-        </select>
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label for="bpm">
-          Starting BPM
-        </label>
-
-        <input
-          id="bpm"
-          type="number"
-          value="128"
-          min="60"
-          max="200"
-        />
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label for="energy">
-          Energy
-        </label>
-
-        <select id="energy">
-          <option>Chill</option>
-          <option>Building</option>
-          <option selected>High</option>
-          <option>Aggressive</option>
-        </select>
-
-      </div>
-
-
-      <div class="form-group full-width">
-
-        <label for="venue">
-          Venue / Setting
-        </label>
-
-        <select id="venue">
-          <option>Club</option>
-          <option>Festival</option>
-          <option>House Party</option>
-          <option>Coffee Shop</option>
-          <option>Livestream</option>
-          <option>After Party</option>
-          <option>Other</option>
-        </select>
-
-      </div>
-
-
-      <div class="form-group full-width">
-
-        <label for="instructions">
-          Set Instructions
-        </label>
-
-        <textarea
-          id="instructions"
-          placeholder="Example: Start heavy but save my biggest tracks for the last 20 minutes. Give me a short reset around the middle."
-        ></textarea>
-
-      </div>
+      <button
+        id="build-button"
+        class="full-button"
+      >
+        Build My Set
+      </button>
 
     </div>
 
+  </section>
 
-    <button
-      id="build-button"
-      style="margin-top:24px;"
-    >
-      Build My Set
-    </button>
+
+  <!-- DOCTOR MODE -->
+
+  <section
+    id="doctor-mode"
+    class="mode-panel"
+  >
+
+    <div class="card">
+
+      <h2>Set Doctor</h2>
+
+      <p class="hint">
+        Pick an existing Rekordbox playlist. Set Doctor will analyze it in its current order.
+      </p>
+
+      <div class="form-group">
+
+        <label>
+          Playlist to Analyze
+        </label>
+
+        <select id="doctor-playlist">
+          <option value="">
+            Upload a Rekordbox XML first
+          </option>
+        </select>
+
+      </div>
+
+      <button
+        id="analyze-button"
+        class="full-button"
+      >
+        Analyze My Set
+      </button>
+
+    </div>
 
   </section>
 
@@ -743,51 +697,78 @@
 
 <script>
 
-/* =====================================================
-   APP STATE
-===================================================== */
+/* ===================================================
+   STATE
+=================================================== */
 
 let fullLibrary = [];
 let playlists = [];
-let manuallyExcluded = new Set();
 
 let currentSet = [];
 let currentSettings = null;
+
 let lockedPositions = new Set();
-let generationNumber = 0;
+
+let doctorSet = [];
 
 
-/* =====================================================
-   SAFE HTML
-===================================================== */
+/* ===================================================
+   UTILITIES
+=================================================== */
 
 function escapeHTML(value) {
-
   return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
 
 function escapeXML(value) {
-
   return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll("'", "&apos;");
-
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&apos;");
 }
 
 
-/* =====================================================
+function switchMode(mode) {
+
+  document
+    .querySelectorAll(".mode-panel")
+    .forEach(
+      panel =>
+        panel.classList.remove("active")
+    );
+
+  document
+    .querySelectorAll(".mode-button")
+    .forEach(
+      button =>
+        button.classList.remove("active")
+    );
+
+  document
+    .getElementById(
+      mode + "-mode"
+    )
+    .classList.add("active");
+
+  document
+    .getElementById(
+      mode + "-mode-button"
+    )
+    .classList.add("active");
+}
+
+
+/* ===================================================
    XML IMPORT
-===================================================== */
+=================================================== */
 
 document
   .getElementById("library-file")
@@ -816,10 +797,6 @@ function handleLibraryUpload(event) {
           e.target.result
         );
 
-        manuallyExcluded.clear();
-        lockedPositions.clear();
-        currentSet = [];
-
         showLibraryLoaded(
           file.name
         );
@@ -838,186 +815,136 @@ function handleLibraryUpload(event) {
 
         status.textContent =
           error.message;
-
       }
 
     };
 
   reader.readAsText(file);
-
 }
 
 
-/* =====================================================
-   PARSE REKORDBOX XML
-===================================================== */
+/* ===================================================
+   PARSE REKORDBOX
+=================================================== */
 
 function parseRekordboxXML(text) {
 
-  const parser =
-    new DOMParser();
-
   const xml =
-    parser.parseFromString(
-      text,
-      "text/xml"
-    );
-
+    new DOMParser()
+      .parseFromString(
+        text,
+        "text/xml"
+      );
 
   if (
     xml.querySelector("parsererror")
   ) {
-
     throw new Error(
-      "That XML file could not be read."
+      "The Rekordbox XML could not be read."
     );
-
   }
 
-
-  const xmlTracks =
+  const tracks =
     Array.from(
       xml.querySelectorAll(
         "COLLECTION > TRACK"
       )
     );
 
-
-  if (!xmlTracks.length) {
-
+  if (!tracks.length) {
     throw new Error(
-      "No Rekordbox tracks were found."
+      "No tracks were found."
     );
-
   }
 
-
   fullLibrary =
-    xmlTracks.map(
-      function(track) {
+    tracks.map(track => ({
 
-        return {
+      id:
+        track.getAttribute("TrackID")
+        || crypto.randomUUID(),
 
-          id:
-            track.getAttribute(
-              "TrackID"
-            )
-            ||
-            crypto.randomUUID(),
+      title:
+        track.getAttribute("Name")
+        || "Unknown Track",
 
-          title:
-            track.getAttribute(
-              "Name"
-            )
-            ||
-            "Unknown Track",
+      artist:
+        track.getAttribute("Artist")
+        || "Unknown Artist",
 
-          artist:
-            track.getAttribute(
-              "Artist"
-            )
-            ||
-            "Unknown Artist",
+      bpm:
+        Number(
+          track.getAttribute(
+            "AverageBpm"
+          )
+        ) || 0,
 
-          bpm:
-            Number(
-              track.getAttribute(
-                "AverageBpm"
-              )
-            )
-            ||
-            0,
+      key:
+        track.getAttribute(
+          "Tonality"
+        ) || "",
 
-          key:
-            track.getAttribute(
-              "Tonality"
-            )
-            ||
-            "",
+      genre:
+        track.getAttribute(
+          "Genre"
+        ) || "",
 
-          genre:
-            track.getAttribute(
-              "Genre"
-            )
-            ||
-            "",
+      rating:
+        Number(
+          track.getAttribute(
+            "Rating"
+          )
+        ) || 0,
 
-          rating:
-            Number(
-              track.getAttribute(
-                "Rating"
-              )
-            )
-            ||
-            0,
+      location:
+        track.getAttribute(
+          "Location"
+        ) || "",
 
-          location:
-            track.getAttribute(
-              "Location"
-            )
-            ||
-            "",
+      kind:
+        track.getAttribute(
+          "Kind"
+        ) || "",
 
-          kind:
-            track.getAttribute(
-              "Kind"
-            )
-            ||
-            "",
+      totalTime:
+        Number(
+          track.getAttribute(
+            "TotalTime"
+          )
+        ) || 0,
 
-          totalTime:
-            Number(
-              track.getAttribute(
-                "TotalTime"
-              )
-            )
-            ||
-            0,
+      comments:
+        track.getAttribute(
+          "Comments"
+        ) || ""
 
-          comments:
-            track.getAttribute(
-              "Comments"
-            )
-            ||
-            ""
-
-        };
-
-      }
-    );
-
+    }));
 
   playlists = [];
 
-
-  const playlistRoot =
+  const root =
     xml.querySelector(
       "PLAYLISTS"
     );
 
-
-  if (playlistRoot) {
+  if (root) {
 
     Array
-      .from(
-        playlistRoot.children
-      )
+      .from(root.children)
       .forEach(
-        node =>
+        child =>
           parsePlaylistNode(
-            node,
+            child,
             ""
           )
       );
-
   }
-
 }
 
 
-/* =====================================================
-   PLAYLIST PARSING
-===================================================== */
+/* ===================================================
+   PLAYLISTS
+=================================================== */
 
 function cleanPlaylistPath(path) {
 
@@ -1031,7 +958,6 @@ function cleanPlaylistPath(path) {
       ""
     )
     .trim();
-
 }
 
 
@@ -1044,93 +970,54 @@ function parsePlaylistNode(
     node.tagName !== "NODE"
   ) return;
 
-
   const name =
-    node.getAttribute(
-      "Name"
-    )
-    ||
-    "Unnamed";
-
-
-  const type =
-    node.getAttribute(
-      "Type"
-    );
-
+    node.getAttribute("Name")
+    || "Unnamed";
 
   let path =
     parentPath
-      ? parentPath
-        + " / "
-        + name
+      ? parentPath + " / " + name
       : name;
-
 
   path =
     cleanPlaylistPath(path);
 
-
-  const trackNodes =
+  const tracks =
     Array
-      .from(
-        node.children
-      )
+      .from(node.children)
       .filter(
         child =>
-          child.tagName
-          ===
-          "TRACK"
+          child.tagName === "TRACK"
       );
 
-
   if (
-    type === "1"
+    node.getAttribute("Type") === "1"
     ||
-    trackNodes.length
+    tracks.length
   ) {
 
-    const trackIds =
-      trackNodes
+    const ids =
+      tracks
         .map(
           track =>
-            track.getAttribute(
-              "Key"
-            )
+            track.getAttribute("Key")
         )
         .filter(Boolean);
 
-
-    if (
-      cleanPlaylistPath(path)
-    ) {
+    if (path) {
 
       playlists.push({
-
-        name:
-          cleanPlaylistPath(
-            path
-          ),
-
-        trackIds:
-          trackIds
-
+        name:path,
+        trackIds:ids
       });
-
     }
-
   }
 
-
   Array
-    .from(
-      node.children
-    )
+    .from(node.children)
     .filter(
       child =>
-        child.tagName
-        ===
-        "NODE"
+        child.tagName === "NODE"
     )
     .forEach(
       child =>
@@ -1139,157 +1026,97 @@ function parsePlaylistNode(
           path
         )
     );
-
 }
 
 
-/* =====================================================
-   DUPLICATES
-===================================================== */
-
-function normalizeDuplicateText(
-  value
-) {
-
-  return String(
-    value || ""
-  )
-    .toLowerCase()
-    .trim()
-    .replace(
-      /\s+/g,
-      " "
-    );
-
-}
-
+/* ===================================================
+   DUPLICATES / FILTERS
+=================================================== */
 
 function duplicateKey(track) {
 
   return (
-    normalizeDuplicateText(
-      track.artist
-    )
+    String(track.artist || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g," ")
     +
     "|||"
     +
-    normalizeDuplicateText(
-      track.title
-    )
+    String(track.title || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g," ")
   );
-
 }
 
 
-/* =====================================================
-   SAMPLE DETECTION
-===================================================== */
-
-function isLikelySample(track) {
+function isSample(track) {
 
   const text =
     (
-      track.title
-      + " "
-      + track.artist
-      + " "
+      track.title + " "
+      + track.artist + " "
       + track.location
     )
     .toLowerCase();
 
-
-  const suspicious = [
-
+  return [
     "rekordbox sample",
-    "rekordbox/sample",
-    "rekordbox%20sample",
     "pioneer sample",
     "alphatheta sample",
-    "demo track",
-    "demo audio",
     "sample track",
-    "rekordbox contents",
+    "demo audio",
     "/samples/",
-    "%2fsamples%2f"
-
-  ];
-
-
-  return suspicious.some(
-    keyword =>
-      text.includes(
-        keyword
-      )
+    "rekordbox contents"
+  ]
+  .some(
+    term =>
+      text.includes(term)
   );
-
 }
 
 
-/* =====================================================
-   SELECTED PLAYLIST
-===================================================== */
-
 function getSelectedSourceTracks() {
 
-  const selected =
+  const value =
     document
       .getElementById(
         "playlist-select"
       )
       .value;
 
-
   if (
-    selected === "ALL"
+    value === "ALL"
   ) {
-
-    return [
-      ...fullLibrary
-    ];
-
+    return [...fullLibrary];
   }
-
 
   const playlist =
     playlists[
-      Number(selected)
+      Number(value)
     ];
-
 
   if (!playlist) {
-
-    return [
-      ...fullLibrary
-    ];
-
+    return [...fullLibrary];
   }
-
 
   const ids =
     new Set(
       playlist.trackIds
     );
 
-
   return fullLibrary.filter(
     track =>
-      ids.has(
-        track.id
-      )
+      ids.has(track.id)
   );
-
 }
 
 
-/* =====================================================
-   EXCLUSIONS
-===================================================== */
+function getFilteredTracks() {
 
-function getFilteredLibraryData() {
-
-  const sourceTracks =
+  const source =
     getSelectedSourceTracks();
-
 
   const removeSamples =
     document
@@ -1298,14 +1125,12 @@ function getFilteredLibraryData() {
       )
       .checked;
 
-
   const removeMissing =
     document
       .getElementById(
         "filter-missing"
       )
       .checked;
-
 
   const removeDuplicates =
     document
@@ -1314,132 +1139,70 @@ function getFilteredLibraryData() {
       )
       .checked;
 
-
-  const seenDuplicates =
+  const seen =
     new Set();
-
 
   const usable = [];
 
+  let samples = 0;
+  let missing = 0;
+  let duplicates = 0;
 
-  const stats = {
+  source.forEach(track => {
 
-    samples: 0,
-    missing: 0,
-    duplicates: 0,
-    manual: 0
-
-  };
-
-
-  sourceTracks.forEach(
-    function(track) {
-
-      if (
-        manuallyExcluded.has(
-          track.id
-        )
-      ) {
-
-        stats.manual++;
-
-        return;
-
-      }
-
-
-      if (
-        removeSamples
-        &&
-        isLikelySample(
-          track
-        )
-      ) {
-
-        stats.samples++;
-
-        return;
-
-      }
-
-
-      if (
-        removeMissing
-        &&
-        !track.location
-      ) {
-
-        stats.missing++;
-
-        return;
-
-      }
-
-
-      if (
-        removeDuplicates
-      ) {
-
-        const key =
-          duplicateKey(
-            track
-          );
-
-
-        if (
-          seenDuplicates.has(
-            key
-          )
-        ) {
-
-          stats.duplicates++;
-
-          return;
-
-        }
-
-
-        seenDuplicates.add(
-          key
-        );
-
-      }
-
-
-      usable.push(
-        track
-      );
-
+    if (
+      removeSamples
+      &&
+      isSample(track)
+    ) {
+      samples++;
+      return;
     }
-  );
 
+    if (
+      removeMissing
+      &&
+      !track.location
+    ) {
+      missing++;
+      return;
+    }
+
+    if (
+      removeDuplicates
+    ) {
+
+      const key =
+        duplicateKey(track);
+
+      if (
+        seen.has(key)
+      ) {
+        duplicates++;
+        return;
+      }
+
+      seen.add(key);
+    }
+
+    usable.push(track);
+  });
 
   return {
-
-    sourceTracks,
+    source,
     usable,
-    stats
-
+    samples,
+    missing,
+    duplicates
   };
-
 }
 
 
-function getUsableTracks() {
+/* ===================================================
+   LIBRARY UI
+=================================================== */
 
-  return getFilteredLibraryData()
-    .usable;
-
-}
-
-
-/* =====================================================
-   LIBRARY DISPLAY
-===================================================== */
-
-function showLibraryLoaded(
-  filename
-) {
+function showLibraryLoaded(filename) {
 
   const status =
     document
@@ -1447,16 +1210,12 @@ function showLibraryLoaded(
         "library-status"
       );
 
-
   status.className =
     "status success";
 
-
   status.textContent =
     "Rekordbox library loaded: "
-    +
-    filename;
-
+    + filename;
 
   document
     .getElementById(
@@ -1465,87 +1224,78 @@ function showLibraryLoaded(
     .style.display =
       "block";
 
+  buildPlaylistMenus();
 
-  buildPlaylistMenu();
-
-  refreshLibraryDisplay();
-
+  refreshLibraryInfo();
 }
 
 
-function buildPlaylistMenu() {
+function buildPlaylistMenus() {
 
-  const select =
+  const sourceSelect =
     document
       .getElementById(
         "playlist-select"
       );
 
+  const doctorSelect =
+    document
+      .getElementById(
+        "doctor-playlist"
+      );
 
-  select.innerHTML = `
+  sourceSelect.innerHTML =
+    `<option value="ALL">
+       Entire Collection
+     </option>`;
 
-    <option value="ALL">
-      Entire Collection
-    </option>
-
-  `;
-
+  doctorSelect.innerHTML =
+    `<option value="">
+       Choose a playlist...
+     </option>`;
 
   playlists.forEach(
-    function(
-      playlist,
-      index
-    ) {
+    (playlist,index) => {
 
       const option =
         document.createElement(
           "option"
         );
 
-
       option.value =
         index;
 
-
       option.textContent =
         playlist.name
-        +
-        " ("
-        +
-        playlist.trackIds.length
-        +
-        ")";
+        + " ("
+        + playlist.trackIds.length
+        + ")";
 
+      sourceSelect
+        .appendChild(
+          option.cloneNode(true)
+        );
 
-      select.appendChild(
-        option
-      );
-
+      doctorSelect
+        .appendChild(
+          option
+        );
     }
   );
-
 }
 
 
-function refreshLibraryDisplay() {
+function refreshLibraryInfo() {
 
   const data =
-    getFilteredLibraryData();
-
-
-  const totalExcluded =
-    data.sourceTracks.length
-    -
-    data.usable.length;
-
+    getFilteredTracks();
 
   document
     .getElementById(
       "collection-count"
     )
     .textContent =
-      data.sourceTracks.length;
-
+      data.source.length;
 
   document
     .getElementById(
@@ -1554,14 +1304,14 @@ function refreshLibraryDisplay() {
     .textContent =
       data.usable.length;
 
-
   document
     .getElementById(
       "excluded-count"
     )
     .textContent =
-      totalExcluded;
-
+      data.source.length
+      -
+      data.usable.length;
 
   document
     .getElementById(
@@ -1570,306 +1320,51 @@ function refreshLibraryDisplay() {
     .textContent =
       playlists.length;
 
-
   document
     .getElementById(
-      "exclusion-breakdown"
+      "exclusion-info"
     )
     .textContent =
-
-      "Excluded: "
-      +
-      data.stats.samples
-      +
-      " samples · "
-      +
-      data.stats.duplicates
-      +
-      " duplicates · "
-      +
-      data.stats.missing
-      +
-      " missing files · "
-      +
-      data.stats.manual
-      +
-      " manually excluded";
-
-
-  renderLibraryManager();
-
+      data.samples
+      + " samples · "
+      + data.duplicates
+      + " duplicates · "
+      + data.missing
+      + " missing";
 }
 
 
-/* =====================================================
-   LIBRARY MANAGER
-===================================================== */
-
-function renderLibraryManager() {
-
-  const search =
-    document
-      .getElementById(
-        "library-search"
-      )
-      .value
-      .trim()
-      .toLowerCase();
-
-
-  let tracks =
-    getSelectedSourceTracks();
-
-
-  if (search) {
-
-    tracks =
-      tracks.filter(
-        track =>
-
-          track.title
-            .toLowerCase()
-            .includes(
-              search
-            )
-
-          ||
-
-          track.artist
-            .toLowerCase()
-            .includes(
-              search
-            )
-
-      );
-
-  }
-
-
-  tracks =
-    tracks.slice(
-      0,
-      200
-    );
-
-
-  const list =
-    document
-      .getElementById(
-        "library-list"
-      );
-
-
-  if (
-    !tracks.length
-  ) {
-
-    list.innerHTML = `
-
-      <div class="empty-message">
-        No matching tracks.
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  const duplicateCounts =
-    {};
-
-
-  tracks.forEach(
-    track => {
-
-      const key =
-        duplicateKey(
-          track
-        );
-
-      duplicateCounts[key] =
-        (
-          duplicateCounts[key]
-          ||
-          0
-        )
-        +
-        1;
-
-    }
-  );
-
-
-  list.innerHTML =
-    tracks
-      .map(
-        function(track) {
-
-          const isDuplicate =
-            duplicateCounts[
-              duplicateKey(
-                track
-              )
-            ]
-            >
-            1;
-
-
-          return `
-
-            <div class="library-track">
-
-              <input
-                type="checkbox"
-                class="track-checkbox"
-                data-id="${escapeHTML(track.id)}"
-                ${
-                  manuallyExcluded.has(
-                    track.id
-                  )
-                    ? ""
-                    : "checked"
-                }
-              />
-
-              <div>
-
-                <div class="library-track-title">
-                  ${escapeHTML(track.title)}
-                </div>
-
-                <div class="library-track-details">
-
-                  ${escapeHTML(track.artist)}
-
-                  ${
-                    track.bpm
-                      ? " • "
-                        +
-                        track.bpm
-                        +
-                        " BPM"
-                      : ""
-                  }
-
-                  ${
-                    track.key
-                      ? " • "
-                        +
-                        escapeHTML(
-                          track.key
-                        )
-                      : ""
-                  }
-
-                  ${
-                    isDuplicate
-                      ? " • DUPLICATE"
-                      : ""
-                  }
-
-                </div>
-
-              </div>
-
-              <span class="pill">
-
-                ${escapeHTML(
-                  track.genre
-                  ||
-                  "No genre"
-                )}
-
-              </span>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-
-  document
-    .querySelectorAll(
-      ".track-checkbox"
-    )
-    .forEach(
-      checkbox => {
-
-        checkbox
-          .addEventListener(
-            "change",
-            function() {
-
-              const id =
-                this.dataset.id;
-
-
-              if (
-                this.checked
-              ) {
-
-                manuallyExcluded.delete(
-                  id
-                );
-
-              }
-
-              else {
-
-                manuallyExcluded.add(
-                  id
-                );
-
-              }
-
-
-              refreshLibraryDisplay();
-
-            }
-          );
-
-      }
-    );
-
-}
-
-
-/* =====================================================
-   CAMELOT / HARMONIC MIXING
-===================================================== */
+/* ===================================================
+   CAMELOT / KEYS
+=================================================== */
 
 const camelotMap = {
 
-  "abm":"1A",
   "g#m":"1A",
+  "abm":"1A",
   "b":"1B",
 
-  "ebm":"2A",
   "d#m":"2A",
+  "ebm":"2A",
   "f#":"2B",
   "gb":"2B",
 
-  "bbm":"3A",
   "a#m":"3A",
-  "db":"3B",
+  "bbm":"3A",
   "c#":"3B",
+  "db":"3B",
 
   "fm":"4A",
-  "ab":"4B",
   "g#":"4B",
+  "ab":"4B",
 
   "cm":"5A",
-  "eb":"5B",
   "d#":"5B",
+  "eb":"5B",
 
   "gm":"6A",
-  "bb":"6B",
   "a#":"6B",
+  "bb":"6B",
 
   "dm":"7A",
   "f":"7B",
@@ -1889,47 +1384,7 @@ const camelotMap = {
 
   "c#m":"12A",
   "dbm":"12A",
-  "e":"12B",
-
-  "a♭ minor":"1A",
-  "g# minor":"1A",
-  "b major":"1B",
-
-  "e♭ minor":"2A",
-  "d# minor":"2A",
-  "f# major":"2B",
-
-  "b♭ minor":"3A",
-  "a# minor":"3A",
-  "d♭ major":"3B",
-  "c# major":"3B",
-
-  "f minor":"4A",
-  "a♭ major":"4B",
-
-  "c minor":"5A",
-  "e♭ major":"5B",
-
-  "g minor":"6A",
-  "b♭ major":"6B",
-
-  "d minor":"7A",
-  "f major":"7B",
-
-  "a minor":"8A",
-  "c major":"8B",
-
-  "e minor":"9A",
-  "g major":"9B",
-
-  "b minor":"10A",
-  "d major":"10B",
-
-  "f# minor":"11A",
-  "a major":"11B",
-
-  "c# minor":"12A",
-  "e major":"12B"
+  "e":"12B"
 
 };
 
@@ -1938,702 +1393,164 @@ function normalizeKey(key) {
 
   if (!key) return "";
 
-
   const cleaned =
     key
       .trim()
       .toLowerCase();
 
-
   if (
     /^(1[0-2]|[1-9])[ab]$/i
-      .test(
-        cleaned
-      )
+      .test(cleaned)
   ) {
-
     return cleaned
       .toUpperCase();
-
   }
 
-
-  return camelotMap[
-    cleaned
-  ]
-  ||
-  "";
-
+  return camelotMap[cleaned]
+    || "";
 }
 
 
-function camelotCompatibility(
+function harmonicScore(
   key1,
   key2
 ) {
 
   const a =
-    normalizeKey(
-      key1
-    );
-
+    normalizeKey(key1);
 
   const b =
-    normalizeKey(
-      key2
-    );
+    normalizeKey(key2);
 
+  if (!a || !b)
+    return 10;
 
-  if (
-    !a
-    ||
-    !b
-  ) {
-
-    return 0;
-
-  }
-
-
-  if (
-    a === b
-  ) {
-
+  if (a === b)
     return 30;
 
-  }
+  const numA =
+    parseInt(a);
 
-
-  const numberA =
-    parseInt(
-      a
-    );
-
-
-  const numberB =
-    parseInt(
-      b
-    );
-
+  const numB =
+    parseInt(b);
 
   const letterA =
-    a.slice(
-      -1
-    );
-
+    a.slice(-1);
 
   const letterB =
-    b.slice(
-      -1
-    );
-
+    b.slice(-1);
 
   if (
-    numberA === numberB
+    numA === numB
     &&
     letterA !== letterB
-  ) {
-
-    return 24;
-
-  }
-
+  )
+    return 25;
 
   const next =
-    numberA === 12
+    numA === 12
       ? 1
-      : numberA + 1;
-
+      : numA + 1;
 
   const previous =
-    numberA === 1
+    numA === 1
       ? 12
-      : numberA - 1;
-
+      : numA - 1;
 
   if (
     letterA === letterB
     &&
     (
-      numberB === next
+      numB === next
       ||
-      numberB === previous
+      numB === previous
     )
-  ) {
+  )
+    return 23;
 
-    return 22;
-
-  }
-
-
-  return -8;
-
+  return 0;
 }
 
 
-/* =====================================================
+/* ===================================================
    ENERGY
-===================================================== */
+=================================================== */
 
-function trackEnergyScore(
-  track
-) {
+function energyScore(track) {
 
   let score = 5;
-
-
-  const rating =
-    track.rating > 5
-      ? track.rating / 51
-      : track.rating;
-
-
-  if (
-    rating >= 5
-  ) {
-
-    score += 2;
-
-  }
-
-  else if (
-    rating >= 4
-  ) {
-
-    score += 1;
-
-  }
-
-
-  if (
-    track.bpm >= 140
-  ) {
-
-    score += 1;
-
-  }
-
 
   const text =
     (
       track.genre
-      +
-      " "
-      +
-      track.title
+      + " "
+      + track.title
     )
     .toLowerCase();
 
+  if (
+    track.bpm >= 140
+  )
+    score++;
 
   if (
-    text.includes(
-      "riddim"
-    )
+    text.includes("riddim")
     ||
-    text.includes(
-      "dubstep"
-    )
+    text.includes("dubstep")
     ||
-    text.includes(
-      "bass"
-    )
-  ) {
+    text.includes("bass")
+  )
+    score++;
 
-    score += 1;
+  let rating =
+    track.rating;
 
-  }
+  if (
+    rating > 5
+  )
+    rating =
+      rating / 51;
 
+  if (
+    rating >= 4
+  )
+    score++;
 
   return Math.min(
     10,
     score
   );
-
 }
 
 
-function desiredEnergyAtPosition(
-  position,
-  total,
-  energy
-) {
+/* ===================================================
+   BUILD GENERATOR
+=================================================== */
 
-  const progress =
-    total <= 1
-      ? 0
-      : position
-        /
-        (
-          total - 1
-        );
+document
+  .getElementById(
+    "build-button"
+  )
+  .addEventListener(
+    "click",
+    buildSet
+  );
 
 
-  let baseStart = 4;
-  let peak = 8;
+function buildSet() {
 
+  const library =
+    getFilteredTracks()
+      .usable;
 
-  if (
-    energy === "Chill"
-  ) {
-
-    baseStart = 3;
-    peak = 6;
-
-  }
-
-
-  if (
-    energy === "Building"
-  ) {
-
-    baseStart = 4;
-    peak = 8;
-
-  }
-
-
-  if (
-    energy === "High"
-  ) {
-
-    baseStart = 6;
-    peak = 9;
-
-  }
-
-
-  if (
-    energy === "Aggressive"
-  ) {
-
-    baseStart = 7;
-    peak = 10;
-
-  }
-
-
-  if (
-    progress < 0.60
-  ) {
-
-    return baseStart
-      +
-      (
-        peak
-        -
-        baseStart
-      )
-      *
-      (
-        progress
-        /
-        0.60
-      );
-
-  }
-
-
-  if (
-    progress < 0.75
-  ) {
-
-    return peak - 2;
-
-  }
-
-
-  return peak;
-
-}
-
-
-/* =====================================================
-   TRACK SCORING
-===================================================== */
-
-function scoreCandidate(
-  track,
-  previousTrack,
-  targetBpm,
-  desiredEnergy,
-  genre,
-  position,
-  totalTracks,
-  randomness = 0
-) {
-
-  let score =
-    100;
-
-
-  if (
-    track.bpm
-  ) {
-
-    score -=
-      Math.abs(
-        track.bpm
-        -
-        targetBpm
-      )
-      *
-      6;
-
-  }
-
-  else {
-
-    score -= 35;
-
-  }
-
-
-  const requested =
-    genre
-      .toLowerCase();
-
-
-  const trackGenre =
-    track.genre
-      .toLowerCase();
-
-
-  if (
-    requested !==
-    "open format"
-  ) {
-
-    if (
-      trackGenre
-      &&
-      (
-        trackGenre.includes(
-          requested
-        )
-        ||
-        requested.includes(
-          trackGenre
-        )
-      )
-    ) {
-
-      score += 30;
-
-    }
-
-    else if (
-      trackGenre
-    ) {
-
-      score -= 8;
-
-    }
-
-  }
-
-
-  const actualEnergy =
-    trackEnergyScore(
-      track
+  if (!library.length) {
+    alert(
+      "Import a usable Rekordbox library first."
     );
-
-
-  score -=
-    Math.abs(
-      actualEnergy
-      -
-      desiredEnergy
-    )
-    *
-    5;
-
-
-  if (
-    previousTrack
-  ) {
-
-    score +=
-      camelotCompatibility(
-        previousTrack.key,
-        track.key
-      );
-
-
-    if (
-      previousTrack.bpm
-      &&
-      track.bpm
-    ) {
-
-      const jump =
-        Math.abs(
-          previousTrack.bpm
-          -
-          track.bpm
-        );
-
-
-      if (
-        jump <= 2
-      ) {
-
-        score += 15;
-
-      }
-
-      else if (
-        jump <= 4
-      ) {
-
-        score += 8;
-
-      }
-
-      else if (
-        jump >= 10
-      ) {
-
-        score -= 25;
-
-      }
-
-    }
-
+    return;
   }
 
-
-  const progress =
-    totalTracks <= 1
-      ? 0
-      : position
-        /
-        (
-          totalTracks - 1
-        );
-
-
-  const rating =
-    track.rating > 5
-      ? track.rating / 51
-      : track.rating;
-
-
-  if (
-    progress > 0.78
-    &&
-    rating >= 4
-  ) {
-
-    score += 18;
-
-  }
-
-
-  if (
-    randomness > 0
-  ) {
-
-    score +=
-      Math.random()
-      *
-      randomness;
-
-  }
-
-
-  return score;
-
-}
-
-
-/* =====================================================
-   TRANSITION SUGGESTIONS
-===================================================== */
-
-function getTransitionSuggestion(
-  current,
-  next,
-  genre
-) {
-
-  if (
-    !current
-    ||
-    !next
-  ) {
-
-    return "";
-
-  }
-
-
-  const bpmDiff =
-    current.bpm
-    &&
-    next.bpm
-      ? next.bpm
-        -
-        current.bpm
-      : 0;
-
-
-  const compatibility =
-    camelotCompatibility(
-      current.key,
-      next.key
-    );
-
-
-  let technique =
-    "Use a standard phrased transition.";
-
-
-  if (
-    genre === "Riddim"
-    ||
-    genre === "Dubstep"
-  ) {
-
-    if (
-      Math.abs(
-        bpmDiff
-      )
-      <=
-      2
-    ) {
-
-      technique =
-        "Good candidate for a double, drop swap, or quick 16-bar transition.";
-
-    }
-
-    else {
-
-      technique =
-        "Consider a breakdown, fake-out, quick cut, or tempo transition before the next drop.";
-
-    }
-
-  }
-
-  else if (
-    genre.includes(
-      "House"
-    )
-  ) {
-
-    if (
-      Math.abs(
-        bpmDiff
-      )
-      <=
-      2
-    ) {
-
-      technique =
-        "Use a long phrased blend with gradual EQ or filter swapping.";
-
-    }
-
-    else {
-
-      technique =
-        "Make the BPM adjustment during a breakdown or lower-energy phrase.";
-
-    }
-
-  }
-
-
-  let harmonic =
-    "";
-
-
-  if (
-    compatibility >= 22
-  ) {
-
-    harmonic =
-      " Keys are harmonically compatible.";
-
-  }
-
-  else if (
-    compatibility < 0
-  ) {
-
-    harmonic =
-      " Keys are less compatible, so avoid layering melodic sections for too long.";
-
-  }
-
-
-  let tempo =
-    "";
-
-
-  if (
-    current.bpm
-    &&
-    next.bpm
-  ) {
-
-    if (
-      bpmDiff > 0
-    ) {
-
-      tempo =
-        " Increase approximately "
-        +
-        Math.abs(
-          bpmDiff
-        ).toFixed(1)
-        +
-        " BPM.";
-
-    }
-
-    else if (
-      bpmDiff < 0
-    ) {
-
-      tempo =
-        " Reduce approximately "
-        +
-        Math.abs(
-          bpmDiff
-        ).toFixed(1)
-        +
-        " BPM.";
-
-    }
-
-    else {
-
-      tempo =
-        " BPMs match.";
-
-    }
-
-  }
-
-
-  return technique
-    +
-    harmonic
-    +
-    tempo;
-
-}
-
-
-/* =====================================================
-   SET SETTINGS
-===================================================== */
-
-function readSetSettings() {
-
-  return {
+  const settings = {
 
     genre:
       document
@@ -2651,7 +1568,7 @@ function readSetSettings() {
           .value
       ),
 
-    startingBpm:
+    bpm:
       Number(
         document
           .getElementById(
@@ -2681,367 +1598,168 @@ function readSetSettings() {
         )
         .value
         .trim()
-
   };
 
-}
-
-
-function getEndingBpm(
-  settings
-) {
+  if (
+    settings.bpm < 60
+    ||
+    settings.bpm > 200
+  ) {
+    alert(
+      "Enter a BPM between 60 and 200."
+    );
+    return;
+  }
 
   let increase = 4;
 
+  if (
+    settings.energy === "Chill"
+  ) increase = 2;
 
   if (
-    settings.energy
-    ===
-    "Chill"
-  ) {
-
-    increase = 2;
-
-  }
-
+    settings.energy === "High"
+  ) increase = 6;
 
   if (
-    settings.energy
-    ===
-    "Building"
-  ) {
+    settings.energy === "Aggressive"
+  ) increase = 8;
 
-    increase = 4;
-
-  }
-
-
-  if (
-    settings.energy
-    ===
-    "High"
-  ) {
-
-    increase = 6;
-
-  }
-
-
-  if (
-    settings.energy
-    ===
-    "Aggressive"
-  ) {
-
-    increase = 8;
-
-  }
-
-
-  return settings.startingBpm
+  settings.endingBpm =
+    settings.bpm
     +
     increase;
 
-}
-
-
-/* =====================================================
-   BUILD SET
-===================================================== */
-
-document
-  .getElementById(
-    "build-button"
-  )
-  .addEventListener(
-    "click",
-    function() {
-
-      lockedPositions.clear();
-
-      generationNumber = 0;
-
-      buildSet(
-        false
-      );
-
-    }
-  );
-
-
-function buildSet(
-  alternateVersion
-) {
-
-  const settings =
-    readSetSettings();
-
-
-  if (
-    settings.startingBpm < 60
-    ||
-    settings.startingBpm > 200
-  ) {
-
-    alert(
-      "Enter a starting BPM between 60 and 200."
-    );
-
-    return;
-
-  }
-
-
-  const usableLibrary =
-    getUsableTracks();
-
-
-  if (
-    !usableLibrary.length
-  ) {
-
-    alert(
-      "There are no usable tracks in the selected collection or playlist."
-    );
-
-    return;
-
-  }
-
-
-  const endingBpm =
-    getEndingBpm(
-      settings
-    );
-
-
-  settings.endingBpm =
-    endingBpm;
-
-
-  const estimatedTracks =
+  const count =
     Math.min(
-
-      usableLibrary.length,
-
+      library.length,
       Math.max(
         6,
         Math.round(
-          settings.length
-          /
-          4
+          settings.length / 4
         )
       )
-
     );
-
 
   const available =
-    usableLibrary.filter(
-      track =>
+    [...library];
 
-        !Array
-          .from(
-            lockedPositions
-          )
-          .some(
-            position =>
-              currentSet[
-                position
-              ]
-              &&
-              currentSet[
-                position
-              ].id
-              ===
-              track.id
-          )
-
-    );
-
-
-  const selectedTracks =
-    new Array(
-      estimatedTracks
-    );
-
-
-  lockedPositions.forEach(
-    position => {
-
-      if (
-        currentSet[position]
-        &&
-        position
-        <
-        estimatedTracks
-      ) {
-
-        selectedTracks[position] =
-          currentSet[position];
-
-      }
-
-    }
-  );
-
+  const set = [];
 
   for (
     let position = 0;
-    position < estimatedTracks;
+    position < count;
     position++
   ) {
 
-    if (
-      selectedTracks[
-        position
-      ]
-    ) {
-
-      continue;
-
-    }
-
-
-    if (
-      !available.length
-    ) {
-
-      break;
-
-    }
-
-
     const progress =
-      estimatedTracks <= 1
-        ? 0
-        : position
-          /
-          (
-            estimatedTracks - 1
-          );
-
+      position
+      /
+      Math.max(
+        1,
+        count - 1
+      );
 
     const targetBpm =
-      settings.startingBpm
+      settings.bpm
       +
       (
-        endingBpm
+        settings.endingBpm
         -
-        settings.startingBpm
+        settings.bpm
       )
       *
       progress;
 
-
-    const desiredEnergy =
-      desiredEnergyAtPosition(
-        position,
-        estimatedTracks,
-        settings.energy
-      );
-
-
-    const previousTrack =
-      position > 0
-        ? selectedTracks[
-            position - 1
+    const previous =
+      set.length
+        ? set[
+            set.length - 1
           ]
         : null;
 
-
-    let bestIndex =
-      0;
-
-
-    let bestScore =
-      -Infinity;
-
+    let bestIndex = 0;
+    let bestScore = -99999;
 
     available.forEach(
-      function(
-        track,
-        index
-      ) {
+      (track,index) => {
 
-        let score =
-          scoreCandidate(
+        let score = 100;
 
-            track,
+        if (track.bpm) {
 
-            previousTrack,
+          score -=
+            Math.abs(
+              track.bpm
+              -
+              targetBpm
+            )
+            *
+            6;
+        }
 
-            targetBpm,
+        const requested =
+          settings.genre
+            .toLowerCase();
 
-            desiredEnergy,
-
-            settings.genre,
-
-            position,
-
-            estimatedTracks,
-
-            alternateVersion
-              ? 18
-              : 0
-
-          );
-
-
-        const nextLocked =
-          selectedTracks[
-            position + 1
-          ];
-
+        const trackGenre =
+          track.genre
+            .toLowerCase();
 
         if (
-          nextLocked
+          requested !==
+          "open format"
         ) {
-
-          score +=
-            camelotCompatibility(
-              track.key,
-              nextLocked.key
-            );
-
 
           if (
-            track.bpm
+            trackGenre.includes(
+              requested
+            )
+            ||
+            requested.includes(
+              trackGenre
+            )
+          )
+            score += 25;
+        }
+
+        if (previous) {
+
+          score +=
+            harmonicScore(
+              previous.key,
+              track.key
+            );
+
+          if (
+            previous.bpm
             &&
-            nextLocked.bpm
+            track.bpm
           ) {
 
-            score -=
+            const jump =
               Math.abs(
-                track.bpm
+                previous.bpm
                 -
-                nextLocked.bpm
-              )
-              *
-              2;
+                track.bpm
+              );
 
+            if (jump <= 2)
+              score += 14;
+
+            if (jump > 8)
+              score -= 30;
           }
-
         }
-
 
         if (
-          score
-          >
-          bestScore
+          score > bestScore
         ) {
-
-          bestScore =
-            score;
-
-          bestIndex =
-            index;
-
+          bestScore = score;
+          bestIndex = index;
         }
-
       }
     );
-
 
     const selected =
       available.splice(
@@ -3049,1070 +1767,1158 @@ function buildSet(
         1
       )[0];
 
-
-    selectedTracks[
-      position
-    ] = {
-
+    set.push({
       ...selected,
-
       energyScore:
-        trackEnergyScore(
-          selected
-        )
-
-    };
-
+        energyScore(selected)
+    });
   }
 
+  currentSet = set;
+  currentSettings = settings;
+  lockedPositions.clear();
 
-  currentSet =
-    selectedTracks.filter(
-      Boolean
-    );
-
-
-  currentSettings =
-    settings;
-
-
-  generationNumber++;
-
-
-  renderGeneratedSet();
-
+  renderBuildResult();
 }
 
 
-/* =====================================================
-   REPLACE A TRACK
-===================================================== */
+/* ===================================================
+   REPLACE + LOCK
+=================================================== */
 
-function replaceTrack(
-  position
-) {
+function toggleLock(index) {
 
   if (
-    lockedPositions.has(
-      position
-    )
-  ) {
+    lockedPositions.has(index)
+  )
+    lockedPositions.delete(index);
+  else
+    lockedPositions.add(index);
 
-    return;
-
-  }
-
-
-  const usable =
-    getUsableTracks();
+  renderBuildResult();
+}
 
 
-  const usedIds =
+function replaceTrack(index) {
+
+  if (
+    lockedPositions.has(index)
+  ) return;
+
+  const library =
+    getFilteredTracks()
+      .usable;
+
+  const used =
     new Set(
       currentSet.map(
         track =>
-          track.id
+          duplicateKey(track)
       )
     );
-
-
-  const usedDuplicates =
-    new Set(
-      currentSet.map(
-        duplicateKey
-      )
-    );
-
-
-  const duplicateFilter =
-    document
-      .getElementById(
-        "filter-duplicates"
-      )
-      .checked;
-
-
-  let candidates =
-    usable.filter(
-      track => {
-
-        if (
-          usedIds.has(
-            track.id
-          )
-        ) {
-
-          return false;
-
-        }
-
-
-        if (
-          duplicateFilter
-          &&
-          usedDuplicates.has(
-            duplicateKey(
-              track
-            )
-          )
-        ) {
-
-          return false;
-
-        }
-
-
-        return true;
-
-      }
-    );
-
-
-  if (
-    !candidates.length
-  ) {
-
-    alert(
-      "No additional matching tracks are available."
-    );
-
-    return;
-
-  }
-
 
   const previous =
-    position > 0
-      ? currentSet[
-          position - 1
-        ]
+    index > 0
+      ? currentSet[index - 1]
       : null;
-
 
   const next =
-    position
-    <
-    currentSet.length - 1
-      ? currentSet[
-          position + 1
-        ]
+    index < currentSet.length - 1
+      ? currentSet[index + 1]
       : null;
 
-
-  const progress =
-    currentSet.length <= 1
-      ? 0
-      : position
-        /
-        (
-          currentSet.length - 1
-        );
-
-
-  const targetBpm =
-    currentSettings.startingBpm
-    +
-    (
-      currentSettings.endingBpm
-      -
-      currentSettings.startingBpm
-    )
-    *
-    progress;
-
-
-  const desiredEnergy =
-    desiredEnergyAtPosition(
-
-      position,
-
-      currentSet.length,
-
-      currentSettings.energy
-
+  const candidates =
+    library.filter(
+      track =>
+        !used.has(
+          duplicateKey(track)
+        )
     );
 
+  if (!candidates.length) {
+    alert(
+      "No additional tracks are available."
+    );
+    return;
+  }
 
-  candidates =
-    candidates
-      .map(
-        track => {
+  let best =
+    candidates[0];
 
-          let score =
-            scoreCandidate(
+  let bestScore =
+    -99999;
 
-              track,
+  candidates.forEach(
+    track => {
 
-              previous,
+      let score = 0;
 
-              targetBpm,
+      if (previous) {
 
-              desiredEnergy,
+        score +=
+          harmonicScore(
+            previous.key,
+            track.key
+          );
 
-              currentSettings.genre,
-
-              position,
-
-              currentSet.length,
-
-              15
-
-            );
-
-
-          if (
-            next
-          ) {
-
-            score +=
-              camelotCompatibility(
-                track.key,
-                next.key
-              );
-
-
-            if (
+        if (
+          previous.bpm
+          &&
+          track.bpm
+        )
+          score -=
+            Math.abs(
+              previous.bpm
+              -
               track.bpm
-              &&
+            )
+            *
+            4;
+      }
+
+      if (next) {
+
+        score +=
+          harmonicScore(
+            track.key,
+            next.key
+          );
+
+        if (
+          next.bpm
+          &&
+          track.bpm
+        )
+          score -=
+            Math.abs(
               next.bpm
-            ) {
+              -
+              track.bpm
+            )
+            *
+            4;
+      }
 
-              score -=
-                Math.abs(
-                  track.bpm
-                  -
-                  next.bpm
-                )
-                *
-                2;
+      score +=
+        Math.random()
+        *
+        10;
 
-            }
+      if (
+        score > bestScore
+      ) {
+        bestScore = score;
+        best = track;
+      }
+    }
+  );
 
-          }
-
-
-          return {
-
-            track,
-            score
-
-          };
-
-        }
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          b.score
-          -
-          a.score
-      );
-
-
-  const replacement =
-    candidates[0]
-      .track;
-
-
-  currentSet[
-    position
-  ] = {
-
-    ...replacement,
-
+  currentSet[index] = {
+    ...best,
     energyScore:
-      trackEnergyScore(
-        replacement
-      )
-
+      energyScore(best)
   };
 
-
-  renderGeneratedSet();
-
+  renderBuildResult();
 }
 
 
-/* =====================================================
-   LOCK TRACK
-===================================================== */
+/* ===================================================
+   BUILD DISPLAY
+=================================================== */
 
-function toggleLock(
-  position
+function transitionText(
+  current,
+  next
 ) {
 
-  if (
-    lockedPositions.has(
-      position
-    )
-  ) {
-
-    lockedPositions.delete(
-      position
-    );
-
-  }
-
-  else {
-
-    lockedPositions.add(
-      position
-    );
-
-  }
-
-
-  renderGeneratedSet();
-
-}
-
-
-/* =====================================================
-   TIMING
-===================================================== */
-
-function formatSetTime(
-  position
-) {
-
-  if (
-    !currentSet.length
-    ||
-    !currentSettings
-  ) {
-
-    return "~0:00";
-
-  }
-
-
-  const minutes =
-    position
-    *
-    (
-      currentSettings.length
-      /
-      currentSet.length
-    );
-
-
-  const wholeMinutes =
-    Math.floor(
-      minutes
-    );
-
-
-  const seconds =
-    Math.round(
-      (
-        minutes
+  const bpmJump =
+    current.bpm
+    &&
+    next.bpm
+      ? next.bpm
         -
-        wholeMinutes
-      )
-      *
-      60
+        current.bpm
+      : 0;
+
+  const harmonic =
+    harmonicScore(
+      current.key,
+      next.key
     );
 
+  let text = "";
 
-  return "~"
-    +
-    wholeMinutes
-    +
-    ":"
-    +
-    String(
-      seconds
-    ).padStart(
-      2,
-      "0"
-    );
+  if (
+    Math.abs(bpmJump) <= 2
+  )
+    text +=
+      "BPMs are close. ";
 
+  else
+    text +=
+      "Plan for a "
+      +
+      Math.abs(bpmJump)
+        .toFixed(1)
+      +
+      " BPM change. ";
+
+  if (
+    harmonic >= 23
+  )
+    text +=
+      "Strong harmonic compatibility.";
+
+  else if (
+    harmonic === 0
+  )
+    text +=
+      "Avoid a long melodic overlap.";
+
+  else
+    text +=
+      "Harmonic transition is workable.";
+
+  return text;
 }
 
 
-/* =====================================================
-   RENDER SET
-===================================================== */
+function renderBuildResult() {
 
-function renderGeneratedSet() {
-
-  let results =
+  let box =
     document
       .getElementById(
-        "set-results"
+        "build-results"
       );
 
+  if (!box) {
 
-  if (!results) {
-
-    results =
+    box =
       document.createElement(
         "section"
       );
 
+    box.id =
+      "build-results";
 
-    results.id =
-      "set-results";
-
-
-    results.className =
+    box.className =
       "card";
 
-
     document
-      .querySelector(
-        ".app"
+      .getElementById(
+        "build-mode"
       )
-      .appendChild(
-        results
-      );
-
+      .appendChild(box);
   }
 
+  box.innerHTML = `
 
-  const tracks =
-    currentSet;
-
-
-  const count =
-    tracks.length;
-
-
-  const openingEnd =
-    Math.max(
-      1,
-      Math.round(
-        count * 0.20
-      )
-    );
-
-
-  const buildEnd =
-    Math.max(
-      openingEnd + 1,
-      Math.round(
-        count * 0.45
-      )
-    );
-
-
-  const peakEnd =
-    Math.max(
-      buildEnd + 1,
-      Math.round(
-        count * 0.65
-      )
-    );
-
-
-  const resetEnd =
-    Math.max(
-      peakEnd + 1,
-      Math.round(
-        count * 0.78
-      )
-    );
-
-
-  const sections = [
-
-    {
-      name:
-        "Opening",
-
-      start:
-        0,
-
-      end:
-        openingEnd,
-
-      description:
-        "Establish the sound and leave room for the set to grow."
-    },
-
-    {
-      name:
-        "Build",
-
-      start:
-        openingEnd,
-
-      end:
-        buildEnd,
-
-      description:
-        "Increase momentum while preserving BPM and harmonic flow."
-    },
-
-    {
-      name:
-        "First Peak",
-
-      start:
-        buildEnd,
-
-      end:
-        peakEnd,
-
-      description:
-        "Deliver the first major payoff with stronger selections."
-    },
-
-    {
-      name:
-        "Reset",
-
-      start:
-        peakEnd,
-
-      end:
-        resetEnd,
-
-      description:
-        "Create contrast and breathing room before the final push."
-    },
-
-    {
-      name:
-        "Final Peak / Closer",
-
-      start:
-        resetEnd,
-
-      end:
-        count,
-
-      description:
-        "Use the strongest remaining tracks and finish decisively."
-    }
-
-  ];
-
-
-  results.innerHTML = `
-
-    <h2>
-      Your Set Plan
-    </h2>
-
-
-    <p class="request">
-
-      ${
-        currentSettings.instructions
-          ? escapeHTML(
-              currentSettings.instructions
-            )
-          : "No additional instructions provided."
-      }
-
-    </p>
-
+    <h2>Your Set Plan</h2>
 
     <div class="summary-grid">
 
       <div class="summary-box">
-
         <div class="summary-label">
           Genre
         </div>
-
         <div class="summary-value">
-          ${escapeHTML(
-            currentSettings.genre
-          )}
+          ${escapeHTML(currentSettings.genre)}
         </div>
-
       </div>
 
-
       <div class="summary-box">
-
         <div class="summary-label">
           Length
         </div>
-
         <div class="summary-value">
           ${currentSettings.length} min
         </div>
-
       </div>
 
-
       <div class="summary-box">
-
         <div class="summary-label">
-          BPM Range
+          BPM
         </div>
-
         <div class="summary-value">
-          ${currentSettings.startingBpm}–${currentSettings.endingBpm}
+          ${currentSettings.bpm}–${currentSettings.endingBpm}
         </div>
-
       </div>
 
-
       <div class="summary-box">
-
         <div class="summary-label">
           Tracks
         </div>
-
         <div class="summary-value">
-          ${tracks.length}
+          ${currentSet.length}
         </div>
+      </div>
 
+    </div>
+
+    ${currentSet.map(
+      (track,index) => {
+
+        const next =
+          currentSet[
+            index + 1
+          ];
+
+        const camelot =
+          normalizeKey(
+            track.key
+          );
+
+        const locked =
+          lockedPositions.has(
+            index
+          );
+
+        return `
+
+          <div
+            class="track
+            ${locked ? "locked" : ""}"
+          >
+
+            <div class="track-number">
+              TRACK ${index + 1}
+            </div>
+
+            <div class="track-title">
+              ${escapeHTML(track.title)}
+            </div>
+
+            <div class="track-artist">
+              ${escapeHTML(track.artist)}
+            </div>
+
+            <div class="meta">
+
+              <span class="pill">
+                ${track.bpm || "?"} BPM
+              </span>
+
+              ${
+                track.key
+                  ? `
+                    <span class="pill good">
+                      ${escapeHTML(track.key)}
+                      ${camelot
+                        ? " • " + camelot
+                        : ""}
+                    </span>
+                  `
+                  : ""
+              }
+
+              ${
+                track.genre
+                  ? `
+                    <span class="pill">
+                      ${escapeHTML(track.genre)}
+                    </span>
+                  `
+                  : ""
+              }
+
+              <span class="pill">
+                Energy ${track.energyScore}/10
+              </span>
+
+            </div>
+
+            <div class="actions">
+
+              <button
+                class="secondary"
+                onclick="replaceTrack(${index})"
+                ${locked ? "disabled" : ""}
+              >
+                ↻ Replace
+              </button>
+
+              <button
+                class="secondary"
+                onclick="toggleLock(${index})"
+              >
+                ${locked ? "🔓 Unlock" : "🔒 Lock"}
+              </button>
+
+            </div>
+
+          </div>
+
+          ${
+            next
+              ? `
+                <div class="transition">
+                  <strong>
+                    Transition → Track ${index + 2}
+                  </strong>
+                  <br>
+                  ${escapeHTML(
+                    transitionText(
+                      track,
+                      next
+                    )
+                  )}
+                </div>
+              `
+              : ""
+          }
+
+        `;
+
+      }
+    ).join("")}
+
+    <div class="result-actions">
+
+      <button
+        class="secondary"
+        onclick="buildSet()"
+      >
+        ↻ Generate Another Set
+      </button>
+
+      <button
+        onclick="exportSetXML(currentSet,currentSettings)"
+      >
+        Export to Rekordbox XML
+      </button>
+
+    </div>
+  `;
+
+  box.scrollIntoView({
+    behavior:"smooth"
+  });
+}
+
+
+/* ===================================================
+   SET DOCTOR
+=================================================== */
+
+document
+  .getElementById(
+    "analyze-button"
+  )
+  .addEventListener(
+    "click",
+    analyzePlaylist
+  );
+
+
+function analyzePlaylist() {
+
+  const value =
+    document
+      .getElementById(
+        "doctor-playlist"
+      )
+      .value;
+
+  if (value === "") {
+
+    alert(
+      "Choose a Rekordbox playlist first."
+    );
+
+    return;
+  }
+
+  const playlist =
+    playlists[
+      Number(value)
+    ];
+
+  if (!playlist) return;
+
+  const ids =
+    playlist.trackIds;
+
+  doctorSet =
+    ids
+      .map(
+        id =>
+          fullLibrary.find(
+            track =>
+              String(track.id)
+              ===
+              String(id)
+          )
+      )
+      .filter(Boolean);
+
+  if (
+    doctorSet.length < 2
+  ) {
+
+    alert(
+      "That playlist does not contain enough readable tracks to analyze."
+    );
+
+    return;
+  }
+
+  renderDoctorResults(
+    playlist
+  );
+}
+
+
+/* ===================================================
+   TRANSITION GRADING
+=================================================== */
+
+function gradeTransition(
+  current,
+  next
+) {
+
+  let score = 100;
+
+  const issues = [];
+  const positives = [];
+
+  if (
+    current.bpm
+    &&
+    next.bpm
+  ) {
+
+    const bpmJump =
+      Math.abs(
+        current.bpm
+        -
+        next.bpm
+      );
+
+    if (
+      bpmJump <= 2
+    ) {
+
+      positives.push(
+        "Very smooth BPM relationship."
+      );
+
+    }
+
+    else if (
+      bpmJump <= 5
+    ) {
+
+      score -= 8;
+
+      issues.push(
+        "Moderate BPM change of "
+        +
+        bpmJump.toFixed(1)
+        +
+        " BPM."
+      );
+
+    }
+
+    else if (
+      bpmJump <= 8
+    ) {
+
+      score -= 20;
+
+      issues.push(
+        "Large BPM change of "
+        +
+        bpmJump.toFixed(1)
+        +
+        " BPM."
+      );
+
+    }
+
+    else {
+
+      score -= 35;
+
+      issues.push(
+        "Major BPM jump of "
+        +
+        bpmJump.toFixed(1)
+        +
+        " BPM."
+      );
+    }
+  }
+
+  const harmonic =
+    harmonicScore(
+      current.key,
+      next.key
+    );
+
+  if (
+    harmonic >= 23
+  ) {
+
+    positives.push(
+      "Strong harmonic compatibility."
+    );
+
+  }
+
+  else if (
+    harmonic === 0
+    &&
+    current.key
+    &&
+    next.key
+  ) {
+
+    score -= 22;
+
+    issues.push(
+      "Keys are not naturally compatible for a long melodic blend."
+    );
+  }
+
+  const e1 =
+    energyScore(current);
+
+  const e2 =
+    energyScore(next);
+
+  const energyJump =
+    Math.abs(e1 - e2);
+
+  if (
+    energyJump >= 4
+  ) {
+
+    score -= 15;
+
+    issues.push(
+      "Sharp energy change between these tracks."
+    );
+  }
+
+  score =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        score
+      )
+    );
+
+  return {
+    score,
+    issues,
+    positives,
+    energy1:e1,
+    energy2:e2
+  };
+}
+
+
+/* ===================================================
+   SET FLOW ANALYSIS
+=================================================== */
+
+function analyzeEnergyFlow(set) {
+
+  const energies =
+    set.map(
+      energyScore
+    );
+
+  const warnings = [];
+
+  for (
+    let i = 0;
+    i <= energies.length - 4;
+    i++
+  ) {
+
+    const chunk =
+      energies.slice(
+        i,
+        i + 4
+      );
+
+    const range =
+      Math.max(...chunk)
+      -
+      Math.min(...chunk);
+
+    if (
+      range <= 1
+    ) {
+
+      warnings.push({
+        start:i,
+        end:i + 3,
+        message:
+          "Tracks "
+          +
+          (i + 1)
+          +
+          "–"
+          +
+          (i + 4)
+          +
+          " stay at almost the same estimated energy."
+      });
+    }
+  }
+
+  return {
+    energies,
+    warnings
+  };
+}
+
+
+/* ===================================================
+   DOCTOR RESULTS
+=================================================== */
+
+function renderDoctorResults(
+  playlist
+) {
+
+  const transitionGrades = [];
+
+  for (
+    let i = 0;
+    i < doctorSet.length - 1;
+    i++
+  ) {
+
+    transitionGrades.push(
+      gradeTransition(
+        doctorSet[i],
+        doctorSet[i + 1]
+      )
+    );
+  }
+
+  const average =
+    transitionGrades.reduce(
+      (sum,item) =>
+        sum + item.score,
+      0
+    )
+    /
+    transitionGrades.length;
+
+  const energy =
+    analyzeEnergyFlow(
+      doctorSet
+    );
+
+  let score =
+    Math.round(
+      average
+    );
+
+  score -=
+    energy.warnings.length
+    *
+    3;
+
+  score =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        score
+      )
+    );
+
+  let rating =
+    "Needs Work";
+
+  if (score >= 90)
+    rating = "Excellent";
+
+  else if (score >= 80)
+    rating = "Strong";
+
+  else if (score >= 70)
+    rating = "Good";
+
+  else if (score >= 60)
+    rating = "Workable";
+
+  let box =
+    document
+      .getElementById(
+        "doctor-results"
+      );
+
+  if (!box) {
+
+    box =
+      document.createElement(
+        "section"
+      );
+
+    box.id =
+      "doctor-results";
+
+    box.className =
+      "card";
+
+    document
+      .getElementById(
+        "doctor-mode"
+      )
+      .appendChild(box);
+  }
+
+  const strongCount =
+    transitionGrades.filter(
+      item =>
+        item.score >= 90
+    ).length;
+
+  const warningCount =
+    transitionGrades.filter(
+      item =>
+        item.score < 70
+    ).length;
+
+  box.innerHTML = `
+
+    <h2>
+      Set Doctor Report
+    </h2>
+
+    <p class="hint">
+      ${escapeHTML(playlist.name)}
+    </p>
+
+    <div class="doctor-score">
+
+      <div class="doctor-number">
+        ${score}
+      </div>
+
+      <div class="doctor-outof">
+        / 100
+      </div>
+
+    </div>
+
+    <h3 style="text-align:center;">
+      ${rating}
+    </h3>
+
+    <div class="summary-grid">
+
+      <div class="summary-box">
+        <div class="summary-label">
+          Tracks
+        </div>
+        <div class="summary-value">
+          ${doctorSet.length}
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-label">
+          Transitions
+        </div>
+        <div class="summary-value">
+          ${transitionGrades.length}
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-label">
+          Strong
+        </div>
+        <div class="summary-value">
+          ${strongCount}
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-label">
+          Weak
+        </div>
+        <div class="summary-value">
+          ${warningCount}
+        </div>
       </div>
 
     </div>
 
 
-    ${sections.map(
+    <h3>
+      Transition Analysis
+    </h3>
 
-      function(section) {
+    ${transitionGrades.map(
+      (grade,index) => {
 
-        const sectionTracks =
-          tracks.slice(
-            section.start,
-            section.end
-          );
-
+        let className =
+          "good";
 
         if (
-          !sectionTracks.length
-        ) {
+          grade.score < 70
+        )
+          className =
+            "bad";
 
-          return "";
-
-        }
-
+        else if (
+          grade.score < 85
+        )
+          className =
+            "warning";
 
         return `
 
-          <div class="set-section">
+          <div
+            class="doctor-item ${className}"
+          >
 
-            <span class="time">
-              ${section.name.toUpperCase()}
+            <span class="doctor-grade">
+              ${grade.score}/100
             </span>
 
-            <h3>
-              ${section.name}
-            </h3>
+            <div class="doctor-item-title">
 
-            <p>
-              ${section.description}
-            </p>
+              Track ${index + 1}
+              →
+              ${index + 2}
 
+            </div>
 
-            ${sectionTracks.map(
+            <div class="doctor-copy">
 
-              function(
-                track,
-                index
-              ) {
+              <strong>
+                ${escapeHTML(
+                  doctorSet[index].title
+                )}
+              </strong>
 
-                const globalIndex =
-                  section.start
-                  +
-                  index;
+              →
 
+              <strong>
+                ${escapeHTML(
+                  doctorSet[index + 1].title
+                )}
+              </strong>
 
-                const number =
-                  globalIndex
-                  +
-                  1;
+              <br><br>
 
-
-                const nextTrack =
-                  tracks[
-                    globalIndex
+              ${
+                grade.positives.length
+                  ? "✓ "
                     +
-                    1
-                  ];
-
-
-                const camelot =
-                  normalizeKey(
-                    track.key
-                  );
-
-
-                const locked =
-                  lockedPositions.has(
-                    globalIndex
-                  );
-
-
-                return `
-
-                  <div
-                    class="track-row
-                    ${locked ? "locked" : ""}"
-                  >
-
-                    <div class="track-top">
-
-                      <div>
-
-                        <div class="track-number">
-                          TRACK ${number}
-                        </div>
-
-                        <div class="track-title">
-                          ${escapeHTML(track.title)}
-                        </div>
-
-                        <div class="track-artist">
-                          ${escapeHTML(track.artist)}
-                        </div>
-
-                      </div>
-
-
-                      <div class="timing">
-
-                        ${formatSetTime(
-                          globalIndex
-                        )}
-
-                      </div>
-
-                    </div>
-
-
-                    <div class="track-meta">
-
-                      <span class="pill">
-
-                        ${
-                          track.bpm
-                            ? track.bpm
-                              +
-                              " BPM"
-                            : "BPM unknown"
-                        }
-
-                      </span>
-
-
-                      ${
-                        track.key
-                          ? `
-
-                            <span class="pill good">
-
-                              ${escapeHTML(track.key)}
-
-                              ${
-                                camelot
-                                  ? " • "
-                                    +
-                                    camelot
-                                  : ""
-                              }
-
-                            </span>
-
-                          `
-                          : ""
-                      }
-
-
-                      ${
-                        track.genre
-                          ? `
-
-                            <span class="pill">
-
-                              ${escapeHTML(track.genre)}
-
-                            </span>
-
-                          `
-                          : ""
-                      }
-
-
-                      <span class="pill">
-
-                        Energy
-                        ${track.energyScore}/10
-
-                      </span>
-
-                    </div>
-
-
-                    <div class="track-actions">
-
-                      <button
-                        class="secondary-button"
-                        onclick="replaceTrack(${globalIndex})"
-                        ${locked ? "disabled" : ""}
-                      >
-
-                        ↻ Replace Track
-
-                      </button>
-
-
-                      <button
-                        class="secondary-button"
-                        onclick="toggleLock(${globalIndex})"
-                      >
-
-                        ${
-                          locked
-                            ? "🔓 Unlock"
-                            : "🔒 Lock"
-                        }
-
-                      </button>
-
-                    </div>
-
-                  </div>
-
-
-                  ${
-                    nextTrack
-                      ? `
-
-                        <div class="transition">
-
-                          <div class="transition-title">
-
-                            Transition to Track
-                            ${number + 1}
-
-                          </div>
-
-                          <div class="transition-text">
-
-                            ${escapeHTML(
-
-                              getTransitionSuggestion(
-
-                                track,
-
-                                nextTrack,
-
-                                currentSettings.genre
-
-                              )
-
-                            )}
-
-                          </div>
-
-                        </div>
-
-                      `
-                      : ""
-                  }
-
-                `;
-
+                    grade.positives
+                      .map(escapeHTML)
+                      .join("<br>✓ ")
+                  : ""
               }
 
-            ).join("")}
+              ${
+                grade.issues.length
+                  ? "<br>⚠ "
+                    +
+                    grade.issues
+                      .map(escapeHTML)
+                      .join("<br>⚠ ")
+                  : ""
+              }
+
+            </div>
 
           </div>
 
         `;
 
       }
-
     ).join("")}
 
 
-    <div class="set-section">
+    ${
+      energy.warnings.length
+        ? `
 
-      <h3>
-        Planner Strategy
-      </h3>
+          <div class="section">
 
-      <p>
+            <h3>
+              Energy Flow
+            </h3>
 
-        This set balances BPM progression,
-        harmonic compatibility,
-        estimated energy,
-        genre relevance,
-        ratings,
-        and placement within the set.
+            ${energy.warnings.map(
+              warning => `
 
-        Locked tracks will remain in place when
-        you generate another version.
+                <div class="doctor-item warning">
 
-      </p>
+                  <div class="doctor-item-title">
+                    ⚠ Flat Energy Section
+                  </div>
 
-    </div>
+                  <div class="doctor-copy">
+                    ${escapeHTML(
+                      warning.message
+                    )}
+                    Consider moving a higher- or lower-energy track into this section to create more contrast.
+                  </div>
+
+                </div>
+
+              `
+            ).join("")}
+
+          </div>
+
+        `
+        : `
+
+          <div class="doctor-item good">
+
+            <div class="doctor-item-title">
+              ✓ Energy Flow Looks Healthy
+            </div>
+
+            <div class="doctor-copy">
+              No obvious four-track flat-energy sections were detected.
+            </div>
+
+          </div>
+
+        `
+    }
 
 
     <div class="result-actions">
 
       <button
-        class="secondary-button"
-        onclick="generateAnotherVersion()"
+        class="secondary"
+        onclick="switchMode('build')"
       >
-
-        ↻ Generate Another Version
-
+        Build a New Set
       </button>
 
-
       <button
-        class="export-button"
-        onclick="exportRekordboxXML()"
+        onclick="exportDoctorXML('${escapeHTML(
+          playlist.name
+        )}')"
       >
-
-        Export to Rekordbox XML
-
+        Export This Playlist
       </button>
 
     </div>
-
-
-    <p class="export-note">
-
-      The exported Rekordbox playlist keeps
-      these tracks in this exact order.
-
-    </p>
-
   `;
 
-
-  results.scrollIntoView({
-
-    behavior:
-      "smooth"
-
+  box.scrollIntoView({
+    behavior:"smooth"
   });
-
 }
 
 
-/* =====================================================
-   REGENERATE
-===================================================== */
+/* ===================================================
+   XML EXPORT
+=================================================== */
 
-function generateAnotherVersion() {
+function exportSetXML(
+  set,
+  settings
+) {
 
-  buildSet(
-    true
-  );
+  if (!set.length)
+    return;
 
-}
-
-
-/* =====================================================
-   REKORDBOX XML EXPORT
-===================================================== */
-
-function createPlaylistName() {
-
-  const today =
-    new Date();
-
-
-  const date =
-    today
-      .toISOString()
-      .slice(
-        0,
-        10
-      );
-
-
-  return "DJ Set Planner - "
+  const name =
+    "DJ Set Copilot - "
     +
-    currentSettings.genre
+    settings.genre
     +
     " - "
     +
-    currentSettings.length
+    settings.length
     +
-    " Min - "
-    +
-    date;
+    " Min";
 
+  exportPlaylistXML(
+    set,
+    name
+  );
 }
 
 
-function exportRekordboxXML() {
+function exportDoctorXML(
+  originalName
+) {
 
-  if (
-    !currentSet.length
-  ) {
+  exportPlaylistXML(
+    doctorSet,
+    originalName
+    +
+    " - Set Doctor"
+  );
+}
 
-    alert(
-      "Build a set first."
-    );
 
+function exportPlaylistXML(
+  set,
+  playlistName
+) {
+
+  if (!set.length)
     return;
 
-  }
-
-
-  const playlistName =
-    createPlaylistName();
-
-
-  const collectionTracks =
-    currentSet
-      .map(
-        track => `
+  const collection =
+    set.map(
+      track => `
 
     <TRACK
       TrackID="${escapeXML(track.id)}"
       Name="${escapeXML(track.title)}"
       Artist="${escapeXML(track.artist)}"
-      Kind="${escapeXML(track.kind || "File")}"
-      TotalTime="${escapeXML(track.totalTime || 0)}"
-      AverageBpm="${escapeXML(track.bpm || 0)}"
-      Rating="${escapeXML(track.rating || 0)}"
-      Location="${escapeXML(track.location)}"
+      AverageBpm="${escapeXML(track.bpm)}"
       Tonality="${escapeXML(track.key)}"
       Genre="${escapeXML(track.genre)}"
+      Rating="${escapeXML(track.rating)}"
+      Location="${escapeXML(track.location)}"
+      TotalTime="${escapeXML(track.totalTime)}"
+      Kind="${escapeXML(track.kind)}"
       Comments="${escapeXML(track.comments)}"
     />
 
-        `
-      )
-      .join("");
-
+      `
+    ).join("");
 
   const playlistTracks =
-    currentSet
-      .map(
-        track => `
+    set.map(
+      track => `
 
         <TRACK
           Key="${escapeXML(track.id)}"
         />
 
-        `
-      )
-      .join("");
+      `
+    ).join("");
 
-
-  const xml = `<?xml version="1.0" encoding="UTF-8" ?>
+  const xml =
+`<?xml version="1.0" encoding="UTF-8"?>
 
 <DJ_PLAYLISTS Version="1.0.0">
 
   <PRODUCT
-    Name="DJ Set Planner"
-    Version="1.0"
-    Company="DJ Set Planner"
+    Name="DJ Set Copilot"
+    Version="7.0"
+    Company="DJ Set Copilot"
   />
 
-  <COLLECTION Entries="${currentSet.length}">
-
-    ${collectionTracks}
-
+  <COLLECTION Entries="${set.length}">
+    ${collection}
   </COLLECTION>
 
   <PLAYLISTS>
@@ -4127,7 +2933,7 @@ function exportRekordboxXML() {
         Name="${escapeXML(playlistName)}"
         Type="1"
         KeyType="0"
-        Entries="${currentSet.length}"
+        Entries="${set.length}"
       >
 
         ${playlistTracks}
@@ -4140,7 +2946,6 @@ function exportRekordboxXML() {
 
 </DJ_PLAYLISTS>`;
 
-
   const blob =
     new Blob(
       [xml],
@@ -4150,20 +2955,19 @@ function exportRekordboxXML() {
       }
     );
 
-
   const url =
     URL.createObjectURL(
       blob
     );
-
 
   const link =
     document.createElement(
       "a"
     );
 
+  link.href = url;
 
-  const safeFilename =
+  link.download =
     playlistName
       .replace(
         /[^a-z0-9-_ ]/gi,
@@ -4172,18 +2976,9 @@ function exportRekordboxXML() {
       .replace(
         /\s+/g,
         "-"
-      );
-
-
-  link.href =
-    url;
-
-
-  link.download =
-    safeFilename
+      )
     +
     ".xml";
-
 
   document
     .body
@@ -4191,72 +2986,37 @@ function exportRekordboxXML() {
       link
     );
 
-
   link.click();
 
-
   link.remove();
-
 
   URL.revokeObjectURL(
     url
   );
-
 }
 
 
-/* =====================================================
-   UI EVENTS
-===================================================== */
+/* ===================================================
+   FILTER EVENTS
+=================================================== */
 
-document
-  .getElementById(
-    "playlist-select"
-  )
-  .addEventListener(
-    "change",
-    refreshLibraryDisplay
-  );
+[
+  "playlist-select",
+  "filter-samples",
+  "filter-missing",
+  "filter-duplicates"
+]
+.forEach(
+  id => {
 
-
-document
-  .getElementById(
-    "filter-samples"
-  )
-  .addEventListener(
-    "change",
-    refreshLibraryDisplay
-  );
-
-
-document
-  .getElementById(
-    "filter-missing"
-  )
-  .addEventListener(
-    "change",
-    refreshLibraryDisplay
-  );
-
-
-document
-  .getElementById(
-    "filter-duplicates"
-  )
-  .addEventListener(
-    "change",
-    refreshLibraryDisplay
-  );
-
-
-document
-  .getElementById(
-    "library-search"
-  )
-  .addEventListener(
-    "input",
-    renderLibraryManager
-  );
+    document
+      .getElementById(id)
+      .addEventListener(
+        "change",
+        refreshLibraryInfo
+      );
+  }
+);
 
 </script>
 
