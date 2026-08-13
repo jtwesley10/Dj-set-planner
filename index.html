@@ -545,7 +545,7 @@
 
 <main class="app">
 
-  <div class="logo">DJ SET COPILOT — V8.1</div>
+  <div class="logo">DJ SET COPILOT — V8.2</div>
 
   <h1>Build it. Then make it better.</h1>
 
@@ -822,7 +822,7 @@
       <h2>Discover New Music</h2>
 
       <p class="hint">
-        Use tracks you already like as seeds. The app asks Last.fm for similar music, then removes tracks already found in your Rekordbox collection.
+        Dig for less-obvious tracks, remixes, flips, edits, bootlegs and VIPs around music you already like. V8.2 downranks high-playcount results and filters out tracks already in your Rekordbox collection.
       </p>
 
       <div class="form-group">
@@ -876,6 +876,16 @@
             <option value="10">10 tracks</option>
             <option value="15" selected>15 tracks</option>
             <option value="25">25 tracks</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Digging Style</label>
+          <select id="discovery-style">
+            <option value="underground-remix" selected>Underground + Remixes</option>
+            <option value="remixes">Remixes / Flips / Bootlegs</option>
+            <option value="underground">Underground Similar Tracks</option>
+            <option value="balanced">Balanced</option>
           </select>
         </div>
 
@@ -3235,7 +3245,7 @@ function exportPlaylistXML(
 
 
 /* ===================================================
-   NEW MUSIC DISCOVERY — LAST.FM
+   NEW MUSIC DISCOVERY — UNDERGROUND / REMIX DIGGING
 =================================================== */
 
 function toggleApiKeyVisibility() {
@@ -3340,6 +3350,81 @@ function normalizedDiscoveryKey(artist, title) {
       .trim()
       .replace(/\s+/g," ")
   );
+}
+
+
+function normalizeArtistName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g," ");
+}
+
+
+const undergroundTitleWords = [
+  "remix",
+  "flip",
+  "bootleg",
+  "edit",
+  "vip",
+  "dub",
+  "rework",
+  "refix",
+  "mashup",
+  "mix",
+  "version"
+];
+
+
+function getRemixSignals(title) {
+
+  const value =
+    String(title || "")
+      .toLowerCase();
+
+  return undergroundTitleWords.filter(
+    word => value.includes(word)
+  );
+}
+
+
+function obscurityScore(playcount) {
+
+  const count =
+    Number(playcount) || 0;
+
+  if (!count) return 18;
+  if (count < 5000) return 40;
+  if (count < 25000) return 34;
+  if (count < 100000) return 26;
+  if (count < 500000) return 12;
+  if (count < 1000000) return 0;
+  if (count < 5000000) return -25;
+  if (count < 20000000) return -55;
+  return -90;
+}
+
+
+function formatPlaycount(value) {
+
+  const count =
+    Number(value) || 0;
+
+  if (!count) return "";
+
+  if (count >= 1000000) {
+    return (
+      Math.round(count / 100000) / 10
+    ) + "M plays";
+  }
+
+  if (count >= 1000) {
+    return (
+      Math.round(count / 100) / 10
+    ) + "K plays";
+  }
+
+  return count + " plays";
 }
 
 
@@ -3519,6 +3604,204 @@ function wait(milliseconds) {
 }
 
 
+function addDiscoveryCandidate(
+  candidates,
+  ownedKeys,
+  item,
+  options = {}
+) {
+
+  const artist =
+    item.artist
+      ? (
+          typeof item.artist === "string"
+            ? item.artist
+            : (
+                item.artist.name
+                ||
+                item.artist["#text"]
+                ||
+                "Unknown Artist"
+              )
+        )
+      : "Unknown Artist";
+
+  const title =
+    item.name
+    ||
+    "Unknown Track";
+
+  const key =
+    normalizedDiscoveryKey(
+      artist,
+      title
+    );
+
+  if (
+    ownedKeys.has(key)
+  ) {
+    return;
+  }
+
+  const playcount =
+    Number(
+      item.playcount
+      ||
+      item.listeners
+      ||
+      0
+    ) || 0;
+
+  const signals =
+    getRemixSignals(title);
+
+  if (!candidates.has(key)) {
+
+    candidates.set(key,{
+      artist,
+      title,
+      lastFmUrl:item.url || "",
+      score:0,
+      appearances:0,
+      seedNames:new Set(),
+      bestMatch:0,
+      playcount,
+      remixSignals:new Set(signals),
+      sources:new Set()
+    });
+  }
+
+  const candidate =
+    candidates.get(key);
+
+  candidate.playcount =
+    candidate.playcount
+    ||
+    playcount;
+
+  signals.forEach(
+    signal =>
+      candidate.remixSignals.add(signal)
+  );
+
+  if (options.source) {
+    candidate.sources.add(options.source);
+  }
+
+  if (options.seed) {
+    candidate.seedNames.add(
+      options.seed.artist
+      +
+      " — "
+      +
+      options.seed.title
+    );
+  }
+
+  const match =
+    Number(options.match) || 0;
+
+  candidate.bestMatch =
+    Math.max(
+      candidate.bestMatch,
+      match
+    );
+
+  candidate.appearances++;
+
+  candidate.score +=
+    Number(options.baseScore) || 0;
+}
+
+
+function scoreDiscoveryCandidate(item, style) {
+
+  let score = item.score;
+
+  const remixCount =
+    item.remixSignals.size;
+
+  const obscure =
+    obscurityScore(
+      item.playcount
+    );
+
+  if (
+    style === "underground-remix"
+  ) {
+    score += obscure * 1.25;
+    score += remixCount ? 50 : 0;
+  }
+  else if (
+    style === "remixes"
+  ) {
+    score += obscure * 0.8;
+    score += remixCount ? 75 : -35;
+  }
+  else if (
+    style === "underground"
+  ) {
+    score += obscure * 1.5;
+    score += remixCount ? 15 : 0;
+  }
+  else {
+    score += obscure * 0.25;
+    score += remixCount ? 15 : 0;
+  }
+
+  score +=
+    item.appearances * 10;
+
+  if (
+    item.sources.has("remix-search")
+  ) {
+    score += 30;
+  }
+
+  return score;
+}
+
+
+function diversifyDiscoveryResults(items, count) {
+
+  const result = [];
+  const artistCounts = new Map();
+
+  for (const item of items) {
+
+    const artistKey =
+      normalizeArtistName(
+        item.artist
+      );
+
+    const artistCount =
+      artistCounts.get(artistKey)
+      ||
+      0;
+
+    if (
+      artistCount >= 2
+    ) {
+      continue;
+    }
+
+    result.push(item);
+    artistCounts.set(
+      artistKey,
+      artistCount + 1
+    );
+
+    if (
+      result.length >= count
+    ) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+
 async function discoverNewMusic() {
 
   const button =
@@ -3608,16 +3891,32 @@ async function discoverNewMusic() {
     return;
   }
 
+  const style =
+    document
+      .getElementById(
+        "discovery-style"
+      )
+      .value;
+
   button.disabled = true;
   button.textContent =
-    "Digging for new music...";
+    "Digging deeper...";
 
   setDiscoveryStatus(
-    "Using "
+    "Digging around "
     +
     seeds.length
     +
-    " seed tracks and filtering against "
+    " seed tracks, prioritizing "
+    +
+    document
+      .getElementById(
+        "discovery-style"
+      )
+      .selectedOptions[0]
+      .textContent
+    +
+    ", and filtering against "
     +
     fullLibrary.length
     +
@@ -3649,23 +3948,49 @@ async function discoverNewMusic() {
       const seed =
         seeds[seedIndex];
 
-      let data = null;
-
+      // First: scene-adjacent tracks based on listening overlap.
       try {
-        data =
+
+        const data =
           await lastFmRequest({
             method:"track.getsimilar",
             artist:seed.artist,
             track:seed.title,
             api_key:apiKey,
             autocorrect:"1",
-            limit:"15"
+            limit:"40"
           });
+
+        const similar =
+          data.similartracks
+          &&
+          data.similartracks.track
+            ? data.similartracks.track
+            : [];
+
+        similar.forEach(item => {
+
+          const match =
+            Number(item.match)
+            ||
+            0;
+
+          addDiscoveryCandidate(
+            candidates,
+            ownedKeys,
+            item,
+            {
+              source:"similar",
+              seed,
+              match,
+              baseScore:match * 100
+            }
+          );
+        });
+
       }
       catch(seedError) {
-        // A Rekordbox track may not exist in Last.fm under the exact same
-        // artist/title (remixes, bootlegs, edits, local files, etc.).
-        // Skip that seed instead of failing the entire discovery run.
+
         if (
           seedError.code === 10
           || seedError.code === 26
@@ -3681,96 +4006,89 @@ async function discoverNewMusic() {
           seed.title,
           seedError.message
         );
-
-        continue;
       }
 
-      const similar =
-        data.similartracks
-        &&
-        data.similartracks.track
-          ? data.similartracks.track
-          : [];
-
-      similar.forEach(item => {
-
-        const artist =
-          item.artist
-            ? (
-                item.artist.name
-                ||
-                item.artist["#text"]
-                ||
-                "Unknown Artist"
-              )
-            : "Unknown Artist";
-
-        const title =
-          item.name
-          ||
-          "Unknown Track";
-
-        const key =
-          normalizedDiscoveryKey(
-            artist,
-            title
-          );
-
-        if (
-          ownedKeys.has(key)
-        ) {
-          return;
-        }
-
-        const match =
-          Number(item.match)
-          ||
-          0;
-
-        if (!candidates.has(key)) {
-
-          candidates.set(key,{
-            artist,
-            title,
-            lastFmUrl:item.url || "",
-            score:0,
-            appearances:0,
-            seedNames:new Set(),
-            bestMatch:0,
-            source:"similar"
-          });
-        }
-
-        const candidate =
-          candidates.get(key);
-
-        candidate.score +=
-          match * 100;
-
-        candidate.appearances++;
-
-        candidate.bestMatch =
-          Math.max(
-            candidate.bestMatch,
-            match
-          );
-
-        candidate.seedNames.add(
-          seed.artist
-          +
-          " — "
-          +
-          seed.title
-        );
-      });
-
-      // Keep requests gentle rather than firing several calls at once.
+      // Second: intentionally search for edits/remixes of the actual seed.
       if (
-        seedIndex
-        <
-        seeds.length - 1
+        style === "underground-remix"
+        ||
+        style === "remixes"
       ) {
-        await wait(300);
+
+        const searchTerms = [
+          "remix",
+          seedIndex % 2 === 0
+            ? "flip"
+            : "bootleg"
+        ];
+
+        for (const term of searchTerms) {
+
+          await wait(350);
+
+          try {
+
+            const searchData =
+              await lastFmRequest({
+                method:"track.search",
+                track:
+                  seed.title
+                  +
+                  " "
+                  +
+                  term,
+                api_key:apiKey,
+                limit:"12"
+              });
+
+            const matches =
+              searchData.results
+              &&
+              searchData.results.trackmatches
+              &&
+              searchData.results.trackmatches.track
+                ? searchData.results.trackmatches.track
+                : [];
+
+            matches.forEach(item => {
+
+              addDiscoveryCandidate(
+                candidates,
+                ownedKeys,
+                item,
+                {
+                  source:"remix-search",
+                  seed,
+                  baseScore:38
+                }
+              );
+            });
+
+          }
+          catch(searchError) {
+
+            if (
+              searchError.code === 10
+              || searchError.code === 26
+              || searchError.code === 29
+            ) {
+              throw searchError;
+            }
+
+            console.warn(
+              "Skipping remix search:",
+              seed.title,
+              term,
+              searchError.message
+            );
+          }
+        }
+      }
+
+      if (
+        seedIndex < seeds.length - 1
+      ) {
+        await wait(400);
       }
     }
 
@@ -3792,29 +4110,51 @@ async function discoverNewMusic() {
           .value;
     }
 
-    // Add a small genre-based discovery pool when a specific genre is selected.
+    // Only Balanced mode uses Last.fm's top-track genre chart.
+    // That chart was the biggest source of overly-mainstream V8 results.
     if (
+      style === "balanced"
+      &&
       genre
       &&
       genre !== "Open Format"
     ) {
 
-      await wait(300);
-
-      let tagData = {};
+      await wait(400);
 
       try {
-        tagData =
+
+        const tagData =
           await lastFmRequest({
             method:"tag.gettoptracks",
             tag:genre,
             api_key:apiKey,
-            limit:"25"
+            limit:"20"
           });
+
+        const tagged =
+          tagData.tracks
+          &&
+          tagData.tracks.track
+            ? tagData.tracks.track
+            : [];
+
+        tagged.forEach(item => {
+
+          addDiscoveryCandidate(
+            candidates,
+            ownedKeys,
+            item,
+            {
+              source:"genre-chart",
+              baseScore:10
+            }
+          );
+        });
+
       }
       catch(tagError) {
-        // Genre fallback is helpful, but it should not erase successful
-        // seed-track recommendations if Last.fm does not recognize the tag.
+
         if (
           tagError.code === 10
           || tagError.code === 26
@@ -3822,68 +4162,7 @@ async function discoverNewMusic() {
         ) {
           throw tagError;
         }
-
-        console.warn(
-          "Skipping Last.fm genre fallback:",
-          genre,
-          tagError.message
-        );
       }
-
-      const tagged =
-        tagData.tracks
-        &&
-        tagData.tracks.track
-          ? tagData.tracks.track
-          : [];
-
-      tagged.forEach(item => {
-
-        const artist =
-          item.artist
-            ? (
-                item.artist.name
-                ||
-                item.artist["#text"]
-                ||
-                "Unknown Artist"
-              )
-            : "Unknown Artist";
-
-        const title =
-          item.name
-          ||
-          "Unknown Track";
-
-        const key =
-          normalizedDiscoveryKey(
-            artist,
-            title
-          );
-
-        if (
-          ownedKeys.has(key)
-        ) {
-          return;
-        }
-
-        if (!candidates.has(key)) {
-
-          candidates.set(key,{
-            artist,
-            title,
-            lastFmUrl:item.url || "",
-            score:15,
-            appearances:0,
-            seedNames:new Set(),
-            bestMatch:0,
-            source:"genre"
-          });
-        }
-        else {
-          candidates.get(key).score += 15;
-        }
-      });
     }
 
     const requestedResults =
@@ -3895,34 +4174,69 @@ async function discoverNewMusic() {
           .value
       );
 
-    discoveryResults =
+    let ranked =
       Array.from(
         candidates.values()
       )
-      .map(item => ({
-        ...item,
-        seedNames:
+      .map(item => {
+
+        const remixSignals =
           Array.from(
-            item.seedNames
-          ),
-        score:
-          item.score
-          +
-          item.appearances * 12
-      }))
-      .sort(
-        (a,b) =>
-          b.score - a.score
-      )
-      .slice(
-        0,
+            item.remixSignals
+          );
+
+        const sources =
+          Array.from(
+            item.sources
+          );
+
+        return {
+          ...item,
+          remixSignals,
+          sources,
+          seedNames:
+            Array.from(
+              item.seedNames
+            ),
+          finalScore:
+            scoreDiscoveryCandidate(
+              item,
+              style
+            )
+        };
+      });
+
+    if (
+      style === "remixes"
+    ) {
+      ranked =
+        ranked.filter(
+          item =>
+            item.remixSignals.length
+            ||
+            item.sources.includes(
+              "remix-search"
+            )
+        );
+    }
+
+    ranked.sort(
+      (a,b) =>
+        b.finalScore
+        -
+        a.finalScore
+    );
+
+    discoveryResults =
+      diversifyDiscoveryResults(
+        ranked,
         requestedResults
       );
 
     if (!discoveryResults.length) {
 
       setDiscoveryStatus(
-        "No new recommendations were found from those seeds. Some Rekordbox edits, bootlegs, or remixes may not exist in Last.fm under the exact same name. Try a different playlist, use fewer seed tracks, or choose a broader genre.",
+        "No strong underground matches came back from those seeds. Try Selected Rekordbox Music Source, use more seed tracks, or switch Digging Style to Balanced.",
         true
       );
 
@@ -3934,12 +4248,13 @@ async function discoverNewMusic() {
       +
       discoveryResults.length
       +
-      " recommendations that are not exact artist/title matches in your Rekordbox collection."
+      " lower-mainstream / remix-weighted recommendations that are not exact artist/title matches in your Rekordbox collection."
     );
 
     renderDiscoveryResults(
       seeds,
-      genre
+      genre,
+      style
     );
 
   }
@@ -3948,9 +4263,7 @@ async function discoverNewMusic() {
     setDiscoveryStatus(
       "Discovery failed: "
       +
-      error.message
-      +
-      " If the key is valid but the browser blocks the request, we can move the Last.fm call into a free Cloudflare Worker later.",
+      error.message,
       true
     );
 
@@ -3964,12 +4277,20 @@ async function discoverNewMusic() {
 }
 
 
-function renderDiscoveryResults(seeds, genre) {
+function renderDiscoveryResults(seeds, genre, style) {
 
   const box =
     document.getElementById(
       "discovery-results"
     );
+
+  const styleLabel =
+    document
+      .getElementById(
+        "discovery-style"
+      )
+      .selectedOptions[0]
+      .textContent;
 
   box.innerHTML = `
 
@@ -3984,7 +4305,7 @@ function renderDiscoveryResults(seeds, genre) {
       </h3>
 
       <p class="hint">
-        ${seeds.map(
+        ${escapeHTML(styleLabel)} · ${seeds.map(
           seed =>
             escapeHTML(
               seed.artist
@@ -4010,26 +4331,79 @@ function renderDiscoveryResults(seeds, genre) {
             track.title
           );
 
+        const deeperQuery =
+          encodeURIComponent(
+            track.artist
+            +
+            " "
+            +
+            genre
+            +
+            " remix flip bootleg underground"
+          );
+
         const similarity =
           Math.round(
             track.bestMatch * 100
           );
 
-        const seedReason =
+        const playcountLabel =
+          formatPlaycount(
+            track.playcount
+          );
+
+        const remixLabel =
+          track.remixSignals.length
+            ? track.remixSignals
+                .map(word =>
+                  word.toUpperCase()
+                )
+                .join(" / ")
+            : "";
+
+        let reason = "Scene-adjacent to your seed tracks";
+
+        if (
+          track.sources.includes(
+            "remix-search"
+          )
+        ) {
+          reason =
+            "Surfaced while deliberately digging for remixes, flips and bootlegs around your seed tracks";
+        }
+        else if (
           track.seedNames.length
-            ? "Similar to "
-              +
-              track.seedNames
-                .slice(0,2)
-                .join(" and ")
-            : "Surfaced from the selected genre";
+        ) {
+          reason =
+            "Connected to "
+            +
+            track.seedNames
+              .slice(0,2)
+              .join(" and ");
+        }
+
+        if (
+          track.remixSignals.length
+        ) {
+          reason +=
+            ". The title also looks like a remix/edit-style release";
+        }
+
+        if (
+          track.playcount
+          &&
+          track.playcount < 100000
+        ) {
+          reason +=
+            ". It also has a relatively low Last.fm play count, which V8.2 treats as an underground signal";
+        }
 
         return `
 
           <div class="discovery-track">
 
             <div class="discovery-rank">
-              DISCOVERY ${index + 1}
+              DIG ${index + 1}
             </div>
 
             <div class="discovery-title">
@@ -4043,24 +4417,30 @@ function renderDiscoveryResults(seeds, genre) {
             <div class="meta">
 
               ${
-                similarity > 0
+                remixLabel
                   ? `
                     <span class="pill good">
-                      ${similarity}% seed similarity
+                      ${escapeHTML(remixLabel)}
                     </span>
                   `
-                  : `
-                    <span class="pill">
-                      Genre discovery
-                    </span>
-                  `
+                  : ""
               }
 
               ${
-                track.appearances > 1
+                similarity > 0
                   ? `
                     <span class="pill">
-                      Matched ${track.appearances} seeds
+                      ${similarity}% seed connection
+                    </span>
+                  `
+                  : ""
+              }
+
+              ${
+                playcountLabel
+                  ? `
+                    <span class="pill">
+                      ${escapeHTML(playcountLabel)}
                     </span>
                   `
                   : ""
@@ -4073,7 +4453,7 @@ function renderDiscoveryResults(seeds, genre) {
             </div>
 
             <div class="discovery-why">
-              ${escapeHTML(seedReason)}. Last.fm similarity is based on listening data; this app then removes exact artist/title matches already present in your imported Rekordbox collection.
+              ${escapeHTML(reason)}.
             </div>
 
             <div class="link-actions">
@@ -4084,7 +4464,16 @@ function renderDiscoveryResults(seeds, genre) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Find on YouTube
+                Find Exact Track on YouTube
+              </a>
+
+              <a
+                class="link-button"
+                href="https://www.youtube.com/results?search_query=${deeperQuery}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Dig Deeper on YouTube
               </a>
 
               ${
@@ -4110,17 +4499,11 @@ function renderDiscoveryResults(seeds, genre) {
 
       }
     ).join("")}
-
   `;
-
-  box.scrollIntoView({
-    behavior:"smooth"
-  });
 }
 
 
 loadSavedLastFmKey();
-
 
 /* ===================================================
    FILTER EVENTS
