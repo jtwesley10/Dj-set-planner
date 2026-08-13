@@ -2504,38 +2504,56 @@ function renderDoctorResults(
     );
   }
 
-  const average =
-    transitionGrades.reduce(
-      (sum,item) =>
-        sum + item.score,
+  // Calculate the average transition score safely
+const validScores =
+  transitionGrades
+    .map(item => Number(item.score))
+    .filter(score => Number.isFinite(score));
+
+let average = 0;
+
+if (validScores.length > 0) {
+  average =
+    validScores.reduce(
+      (sum, score) => sum + score,
       0
-    )
-    /
-    transitionGrades.length;
+    ) / validScores.length;
+}
 
-  const energy =
-    analyzeEnergyFlow(
-      doctorSet
-    );
+const energy =
+  analyzeEnergyFlow(
+    doctorSet
+  );
 
-  let score =
-    Math.round(
-      average
-    );
+// Start overall score with the actual transition average
+let score = average;
 
-  score -=
-    energy.warnings.length
-    *
-    3;
+// Apply a SMALL energy-flow penalty.
+// Cap it so flat-energy warnings can't destroy an otherwise good set.
+const energyPenalty =
+  Math.min(
+    10,
+    energy.warnings.length * 2
+  );
 
-  score =
+score -= energyPenalty;
+
+// Safety check so NaN can never turn the score into something weird
+if (!Number.isFinite(score)) {
+  score = average || 0;
+}
+
+// Final score: whole number from 0–100
+score =
+  Math.round(
     Math.max(
       0,
       Math.min(
         100,
         score
       )
-    );
+    )
+  );
 
   let rating =
     "Needs Work";
