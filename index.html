@@ -545,7 +545,7 @@
 
 <main class="app">
 
-  <div class="logo">DJ SET COPILOT — V8.2</div>
+  <div class="logo">DJ SET COPILOT — V8.3</div>
 
   <h1>Build it. Then make it better.</h1>
 
@@ -822,7 +822,7 @@
       <h2>Discover New Music</h2>
 
       <p class="hint">
-        Dig for less-obvious tracks, remixes, flips, edits, bootlegs and VIPs around music you already like. V8.2 downranks high-playcount results and filters out tracks already in your Rekordbox collection.
+        Dig for less-obvious tracks, remixes, flips, edits, bootlegs and VIPs around music you already like. V8.3 is genre-first: it verifies candidate tags, looks for remixes/edits when you want them, and aims for an underground sweet spot instead of rewarding the absolute lowest play count.
       </p>
 
       <div class="form-group">
@@ -887,6 +887,19 @@
             <option value="underground">Underground Similar Tracks</option>
             <option value="balanced">Balanced</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label>Underground Level</label>
+          <select id="discovery-level">
+            <option value="deep">Deep Cuts</option>
+            <option value="underground" selected>Underground</option>
+            <option value="scene">Scene Favorites</option>
+            <option value="anything">Anything Good</option>
+          </select>
+          <p class="key-note" style="margin-top:7px;">
+            Underground favors niche tracks with real traction. Deep Cuts goes smaller; Scene Favorites allows more established records.
+          </p>
         </div>
 
         <div class="form-group">
@@ -3388,20 +3401,201 @@ function getRemixSignals(title) {
 }
 
 
-function obscurityScore(playcount) {
+const discoveryGenreRules = {
+  "House": {
+    primary:["house"],
+    compatible:["deep house","progressive house","electro house","bass house","funky house"]
+  },
+  "Tech House": {
+    primary:["tech house","tech-house"],
+    compatible:["house","minimal house"]
+  },
+  "Melodic House": {
+    primary:["melodic house","melodic house & techno","melodic techno"],
+    compatible:["progressive house","house"]
+  },
+  "Dubstep": {
+    primary:["dubstep"],
+    compatible:["riddim","trench","tearout","brostep","deep dubstep"]
+  },
+  "Riddim": {
+    primary:["riddim","trench"],
+    compatible:["dubstep","tearout"]
+  },
+  "Drum & Bass": {
+    primary:["drum and bass","drum & bass","drum n bass","dnb"],
+    compatible:["jungle","neurofunk","liquid drum and bass","liquid dnb","jump up"]
+  }
+};
 
-  const count =
-    Number(playcount) || 0;
 
-  if (!count) return 18;
-  if (count < 5000) return 40;
-  if (count < 25000) return 34;
-  if (count < 100000) return 26;
-  if (count < 500000) return 12;
-  if (count < 1000000) return 0;
-  if (count < 5000000) return -25;
-  if (count < 20000000) return -55;
-  return -90;
+function normalizeGenreTag(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[_-]+/g," ")
+    .replace(/\s+/g," ");
+}
+
+
+function getGenreMatch(candidate, genre) {
+
+  if (!genre || genre === "Open Format") {
+    return {
+      pass:true,
+      strength:1,
+      matched:[]
+    };
+  }
+
+  const rules = discoveryGenreRules[genre];
+
+  if (!rules) {
+    return {
+      pass:true,
+      strength:1,
+      matched:[]
+    };
+  }
+
+  const tags =
+    (candidate.tags || [])
+      .map(normalizeGenreTag);
+
+  const primary =
+    rules.primary.filter(
+      wanted =>
+        tags.some(
+          tag =>
+            tag === wanted
+            || tag.includes(wanted)
+            || wanted.includes(tag)
+        )
+    );
+
+  if (primary.length) {
+    return {
+      pass:true,
+      strength:3,
+      matched:primary
+    };
+  }
+
+  const compatible =
+    rules.compatible.filter(
+      wanted =>
+        tags.some(
+          tag =>
+            tag === wanted
+            || tag.includes(wanted)
+            || wanted.includes(tag)
+        )
+    );
+
+  if (compatible.length) {
+    return {
+      pass:true,
+      strength:2,
+      matched:compatible
+    };
+  }
+
+  // A remix/search result can survive sparse Last.fm tagging if it is tied
+  // directly to a seed that Rekordbox itself labels as the requested genre.
+  const seedGenres =
+    (candidate.seedGenres || [])
+      .map(normalizeGenreTag);
+
+  const requested =
+    normalizeGenreTag(genre);
+
+  const seedGenreMatch =
+    seedGenres.some(
+      seedGenre =>
+        seedGenre
+        && (
+          seedGenre.includes(requested)
+          || requested.includes(seedGenre)
+        )
+    );
+
+  if (
+    seedGenreMatch
+    && candidate.sources
+    && candidate.sources.includes("remix-search")
+  ) {
+    return {
+      pass:true,
+      strength:1,
+      matched:["seed genre"]
+    };
+  }
+
+  return {
+    pass:false,
+    strength:0,
+    matched:[]
+  };
+}
+
+
+function popularityBandScore(playcount, level) {
+
+  const count = Number(playcount) || 0;
+
+  // Missing playcount is uncertainty, not proof that something is underground.
+  if (!count) {
+    return level === "anything" ? -5 : -12;
+  }
+
+  if (level === "deep") {
+    if (count < 250) return -45;
+    if (count < 2000) return 5;
+    if (count < 75000) return 38;
+    if (count < 250000) return 20;
+    if (count < 1000000) return 0;
+    return -35;
+  }
+
+  if (level === "scene") {
+    if (count < 5000) return -35;
+    if (count < 25000) return -8;
+    if (count < 1000000) return 34;
+    if (count < 3000000) return 16;
+    if (count < 5000000) return 0;
+    return -28;
+  }
+
+  if (level === "anything") {
+    if (count < 250) return -25;
+    return 5;
+  }
+
+  // Default: Underground — niche, but not zero-traction for zero-traction's sake.
+  if (count < 1000) return -50;
+  if (count < 5000) return -15;
+  if (count < 300000) return 40;
+  if (count < 1000000) return 18;
+  if (count < 3000000) return -5;
+  return -38;
+}
+
+
+function popularityBandLabel(playcount, level) {
+  const count = Number(playcount) || 0;
+  if (!count) return "Traction unknown";
+  if (level === "deep") {
+    if (count >= 2000 && count < 75000) return "Deep-cut sweet spot";
+  }
+  if (level === "scene") {
+    if (count >= 25000 && count < 1000000) return "Scene-favorite sweet spot";
+  }
+  if (level === "underground") {
+    if (count >= 5000 && count < 300000) return "Underground sweet spot";
+  }
+  if (count < 1000) return "Very low traction";
+  if (count >= 3000000) return "More established";
+  return "Usable traction";
 }
 
 
@@ -3667,7 +3861,9 @@ function addDiscoveryCandidate(
       bestMatch:0,
       playcount,
       remixSignals:new Set(signals),
-      sources:new Set()
+      sources:new Set(),
+      tags:new Set(),
+      seedGenres:new Set()
     });
   }
 
@@ -3696,6 +3892,12 @@ function addDiscoveryCandidate(
       +
       options.seed.title
     );
+
+    if (options.seed.genre) {
+      candidate.seedGenres.add(
+        options.seed.genre
+      );
+    }
   }
 
   const match =
@@ -3714,49 +3916,114 @@ function addDiscoveryCandidate(
 }
 
 
-function scoreDiscoveryCandidate(item, style) {
+async function enrichDiscoveryCandidate(candidate, apiKey) {
+
+  try {
+
+    const data =
+      await lastFmRequest({
+        method:"track.gettoptags",
+        artist:candidate.artist,
+        track:candidate.title,
+        api_key:apiKey,
+        autocorrect:"1"
+      });
+
+    const tags =
+      data.toptags
+      && data.toptags.tag
+        ? data.toptags.tag
+        : [];
+
+    tags
+      .slice(0,12)
+      .forEach(tag => {
+        const name =
+          typeof tag === "string"
+            ? tag
+            : tag.name;
+        if (name) {
+          candidate.tags.add(name);
+        }
+      });
+
+  }
+  catch(error) {
+
+    if (
+      error.code === 10
+      || error.code === 26
+      || error.code === 29
+    ) {
+      throw error;
+    }
+
+    // Sparse/obscure releases sometimes have no Last.fm tag record.
+    console.warn(
+      "No usable tags for candidate:",
+      candidate.artist,
+      "—",
+      candidate.title
+    );
+  }
+}
+
+
+function scoreDiscoveryCandidate(item, style, level, genreMatch) {
 
   let score = item.score;
 
   const remixCount =
     item.remixSignals.size;
 
-  const obscure =
-    obscurityScore(
-      item.playcount
+  // Genre is the dominant signal now.
+  if (genreMatch.strength === 3) score += 170;
+  else if (genreMatch.strength === 2) score += 105;
+  else if (genreMatch.strength === 1) score += 55;
+
+  score +=
+    popularityBandScore(
+      item.playcount,
+      level
     );
 
   if (
     style === "underground-remix"
   ) {
-    score += obscure * 1.25;
-    score += remixCount ? 50 : 0;
+    score += remixCount ? 48 : 0;
   }
   else if (
     style === "remixes"
   ) {
-    score += obscure * 0.8;
-    score += remixCount ? 75 : -35;
+    score += remixCount ? 70 : -30;
   }
   else if (
     style === "underground"
   ) {
-    score += obscure * 1.5;
-    score += remixCount ? 15 : 0;
+    score += remixCount ? 12 : 0;
   }
   else {
-    score += obscure * 0.25;
-    score += remixCount ? 15 : 0;
+    score += remixCount ? 10 : 0;
   }
 
   score +=
-    item.appearances * 10;
+    Math.min(
+      item.appearances,
+      4
+    ) * 10;
 
   if (
     item.sources.has("remix-search")
   ) {
-    score += 30;
+    score += 22;
   }
+
+  // Similarity is useful, but no longer allowed to overpower genre.
+  score +=
+    Math.min(
+      item.bestMatch * 35,
+      35
+    );
 
   return score;
 }
@@ -3898,6 +4165,13 @@ async function discoverNewMusic() {
       )
       .value;
 
+  const level =
+    document
+      .getElementById(
+        "discovery-level"
+      )
+      .value;
+
   button.disabled = true;
   button.textContent =
     "Digging deeper...";
@@ -3916,7 +4190,16 @@ async function discoverNewMusic() {
       .selectedOptions[0]
       .textContent
     +
-    ", and filtering against "
+    ", at "
+    +
+    document
+      .getElementById(
+        "discovery-level"
+      )
+      .selectedOptions[0]
+      .textContent
+    +
+    " depth, and filtering against "
     +
     fullLibrary.length
     +
@@ -4174,11 +4457,69 @@ async function discoverNewMusic() {
           .value
       );
 
-    let ranked =
+    // Pre-rank before making tag lookups so we only enrich plausible candidates.
+    let preRanked =
       Array.from(
         candidates.values()
       )
+      .sort(
+        (a,b) =>
+          (
+            b.score
+            + b.bestMatch * 100
+            + b.appearances * 8
+          )
+          -
+          (
+            a.score
+            + a.bestMatch * 100
+            + a.appearances * 8
+          )
+      )
+      .slice(
+        0,
+        Math.min(
+          candidates.size,
+          Math.max(
+            35,
+            requestedResults * 4
+          )
+        )
+      );
+
+    setDiscoveryStatus(
+      "Found candidates. Verifying genre tags before showing anything..."
+    );
+
+    for (
+      let i = 0;
+      i < preRanked.length;
+      i++
+    ) {
+      await enrichDiscoveryCandidate(
+        preRanked[i],
+        apiKey
+      );
+
+      if (i < preRanked.length - 1) {
+        await wait(180);
+      }
+    }
+
+    let ranked =
+      preRanked
       .map(item => {
+
+        const genreMatch =
+          getGenreMatch(
+            {
+              ...item,
+              tags:Array.from(item.tags),
+              sources:Array.from(item.sources),
+              seedGenres:Array.from(item.seedGenres)
+            },
+            genre
+          );
 
         const remixSignals =
           Array.from(
@@ -4190,10 +4531,23 @@ async function discoverNewMusic() {
             item.sources
           );
 
+        const tags =
+          Array.from(
+            item.tags
+          );
+
+        const seedGenres =
+          Array.from(
+            item.seedGenres
+          );
+
         return {
           ...item,
           remixSignals,
           sources,
+          tags,
+          seedGenres,
+          genreMatch,
           seedNames:
             Array.from(
               item.seedNames
@@ -4201,10 +4555,15 @@ async function discoverNewMusic() {
           finalScore:
             scoreDiscoveryCandidate(
               item,
-              style
+              style,
+              level,
+              genreMatch
             )
         };
-      });
+      })
+      .filter(item =>
+        item.genreMatch.pass
+      );
 
     if (
       style === "remixes"
@@ -4217,6 +4576,24 @@ async function discoverNewMusic() {
             item.sources.includes(
               "remix-search"
             )
+        );
+    }
+
+    // Do not promote ultra-low-traction results in the normal Underground mode.
+    if (level === "underground") {
+      ranked =
+        ranked.filter(
+          item =>
+            !item.playcount
+            || item.playcount >= 1000
+        );
+    }
+    else if (level === "scene") {
+      ranked =
+        ranked.filter(
+          item =>
+            !item.playcount
+            || item.playcount >= 5000
         );
     }
 
@@ -4236,7 +4613,7 @@ async function discoverNewMusic() {
     if (!discoveryResults.length) {
 
       setDiscoveryStatus(
-        "No strong underground matches came back from those seeds. Try Selected Rekordbox Music Source, use more seed tracks, or switch Digging Style to Balanced.",
+        "No candidates passed the genre check at this depth. Try Scene Favorites, more seed tracks, or a broader Genre Signal.",
         true
       );
 
@@ -4248,13 +4625,14 @@ async function discoverNewMusic() {
       +
       discoveryResults.length
       +
-      " lower-mainstream / remix-weighted recommendations that are not exact artist/title matches in your Rekordbox collection."
+      " genre-verified recommendations in your selected underground range that are not exact artist/title matches in your Rekordbox collection."
     );
 
     renderDiscoveryResults(
       seeds,
       genre,
-      style
+      style,
+      level
     );
 
   }
@@ -4277,7 +4655,7 @@ async function discoverNewMusic() {
 }
 
 
-function renderDiscoveryResults(seeds, genre, style) {
+function renderDiscoveryResults(seeds, genre, style, level) {
 
   const box =
     document.getElementById(
@@ -4288,6 +4666,14 @@ function renderDiscoveryResults(seeds, genre, style) {
     document
       .getElementById(
         "discovery-style"
+      )
+      .selectedOptions[0]
+      .textContent;
+
+  const levelLabel =
+    document
+      .getElementById(
+        "discovery-level"
       )
       .selectedOptions[0]
       .textContent;
@@ -4305,7 +4691,7 @@ function renderDiscoveryResults(seeds, genre, style) {
       </h3>
 
       <p class="hint">
-        ${escapeHTML(styleLabel)} · ${seeds.map(
+        ${escapeHTML(styleLabel)} · ${escapeHTML(levelLabel)} · ${seeds.map(
           seed =>
             escapeHTML(
               seed.artist
@@ -4333,13 +4719,13 @@ function renderDiscoveryResults(seeds, genre, style) {
 
         const deeperQuery =
           encodeURIComponent(
-            track.artist
+            genre
             +
             " "
             +
-            genre
+            track.artist
             +
-            " remix flip bootleg underground"
+            " remix flip bootleg edit"
           );
 
         const similarity =
@@ -4351,6 +4737,18 @@ function renderDiscoveryResults(seeds, genre, style) {
           formatPlaycount(
             track.playcount
           );
+
+        const tractionLabel =
+          popularityBandLabel(
+            track.playcount,
+            level
+          );
+
+        const genreTags =
+          track.genreMatch
+          && track.genreMatch.matched
+            ? track.genreMatch.matched
+            : [];
 
         const remixLabel =
           track.remixSignals.length
@@ -4389,14 +4787,15 @@ function renderDiscoveryResults(seeds, genre, style) {
             ". The title also looks like a remix/edit-style release";
         }
 
-        if (
-          track.playcount
-          &&
-          track.playcount < 100000
-        ) {
+        if (genreTags.length) {
           reason +=
-            ". It also has a relatively low Last.fm play count, which V8.2 treats as an underground signal";
+            ". Genre check matched "
+            + genreTags.slice(0,3).join(", ");
         }
+
+        reason +=
+          ". "
+          + tractionLabel;
 
         return `
 
@@ -4415,6 +4814,16 @@ function renderDiscoveryResults(seeds, genre, style) {
             </div>
 
             <div class="meta">
+
+              ${
+                genreTags.length
+                  ? `
+                    <span class="pill good">
+                      ${escapeHTML(genreTags.slice(0,2).join(" / "))}
+                    </span>
+                  `
+                  : ""
+              }
 
               ${
                 remixLabel
@@ -4445,6 +4854,10 @@ function renderDiscoveryResults(seeds, genre, style) {
                   `
                   : ""
               }
+
+              <span class="pill">
+                ${escapeHTML(tractionLabel)}
+              </span>
 
               <span class="pill">
                 Not in Rekordbox
