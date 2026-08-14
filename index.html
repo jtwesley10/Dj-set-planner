@@ -545,7 +545,7 @@
 
 <main class="app">
 
-  <div class="logo">DJ SET COPILOT — V9</div>
+  <div class="logo">DJ SET COPILOT — V9.1</div>
 
   <h1>Build it. Then make it better.</h1>
 
@@ -822,7 +822,7 @@
       <h2>Discover New Music</h2>
 
       <p class="hint">
-        V9 starts with artists you already download, uses Last.fm only to find closely related artists, then searches YouTube directly for recent tracks, remixes, flips, edits, bootlegs and VIPs. Results are ranked using actual YouTube views, upload age, artist relevance and genre/remix signals.
+        V9.1 learns from artists you already download, uses the selected Rekordbox source to steer the vibe, then searches YouTube for recent tracks around those artists and their closest neighbors. Results now use smarter library duplicate detection and artist-diversity limits so one artist cannot dominate the list.
       </p>
 
       <div class="discovery-grid">
@@ -3466,6 +3466,126 @@ function normalizeArtistName(value) {
 }
 
 
+function normalizeTrackTitleForOwnership(value) {
+
+  return String(value || "")
+    .toLowerCase()
+    .replace(/&amp;/g,"&")
+    .replace(
+      /\b(official music video|official video|official audio|visualizer|lyric video|lyrics|audio|free download|premiere|out now|stream now|hq|hd)\b/g,
+      " "
+    )
+    .replace(
+      /\b(original mix|radio edit|extended mix|album version)\b/g,
+      " "
+    )
+    .replace(/\[[^\]]*\]/g," ")
+    .replace(/\([^)]*(official|audio|video|visualizer|lyrics?|free download)[^)]*\)/g," ")
+    .replace(/[^a-z0-9]+/g," ")
+    .trim()
+    .replace(/\s+/g," ");
+}
+
+
+function ownershipVariantSignature(value) {
+
+  const text =
+    String(value || "")
+      .toLowerCase();
+
+  const terms = [
+    "remix",
+    "flip",
+    "bootleg",
+    "vip",
+    "refix",
+    "rework",
+    "mashup",
+    "edit"
+  ];
+
+  return terms
+    .filter(term => text.includes(term))
+    .sort()
+    .join("|");
+}
+
+
+function tokenSimilarity(a,b) {
+
+  const left =
+    new Set(
+      String(a || "")
+        .split(/\s+/)
+        .filter(token => token.length > 1)
+    );
+
+  const right =
+    new Set(
+      String(b || "")
+        .split(/\s+/)
+        .filter(token => token.length > 1)
+    );
+
+  if (!left.size || !right.size) {
+    return 0;
+  }
+
+  let overlap = 0;
+
+  left.forEach(token => {
+    if (right.has(token)) overlap++;
+  });
+
+  return overlap / Math.max(left.size,right.size);
+}
+
+
+function inferredYouTubeArtist(item) {
+
+  const rawTitle =
+    String(item.title || "");
+
+  const split =
+    rawTitle.split(/\s[-–—]\s/);
+
+  if (split.length >= 2) {
+    const possibleArtist =
+      normalizeArtistName(split[0]);
+
+    if (possibleArtist) {
+      return possibleArtist;
+    }
+  }
+
+  return normalizeArtistName(
+    item.discoveryArtist
+    ||
+    item.channelTitle
+  );
+}
+
+
+function inferredYouTubeTrackTitle(item) {
+
+  const rawTitle =
+    String(item.title || "");
+
+  const split =
+    rawTitle.split(/\s[-–—]\s/);
+
+  if (split.length >= 2) {
+    return normalizeTrackTitleForOwnership(
+      split.slice(1).join(" - " )
+    );
+  }
+
+  return normalizeTrackTitleForOwnership(
+    rawTitle
+  );
+}
+
+
 function getDiscoveryArtistSourceTracks() {
 
   const source =
@@ -3526,6 +3646,24 @@ function buildArtistSeeds(
   const artists =
     new Map();
 
+  const wholeLibraryCounts =
+    new Map();
+
+  fullLibrary.forEach(track => {
+
+    const key =
+      normalizeArtistName(
+        track.artist
+      );
+
+    if (!key || key === "unknown artist") return;
+
+    wholeLibraryCounts.set(
+      key,
+      (wholeLibraryCounts.get(key) || 0) + 1
+    );
+  });
+
   tracks.forEach(track => {
 
     const artist =
@@ -3553,6 +3691,8 @@ function buildArtistSeeds(
       artists.set(key,{
         artist,
         trackCount:0,
+        libraryTrackCount:
+          wholeLibraryCounts.get(key) || 0,
         genres:new Set(),
         tracks:[]
       });
@@ -3578,9 +3718,23 @@ function buildArtistSeeds(
     )
     .sort(
       (a,b) =>
-        b.trackCount
+        (
+          b.trackCount * 4
+          +
+          Math.min(
+            12,
+            b.libraryTrackCount
+          )
+        )
         -
-        a.trackCount
+        (
+          a.trackCount * 4
+          +
+          Math.min(
+            12,
+            a.libraryTrackCount
+          )
+        )
     )
     .slice(
       0,
@@ -4300,66 +4454,104 @@ function isProbablyAlreadyOwned(
   library
 ) {
 
-  const videoText =
-    normalizeDiscoveryText(
-      (
-        item.title
-        +
-        " "
-        +
-        item.channelTitle
-      )
+  const candidateArtist =
+    inferredYouTubeArtist(item);
+
+  const candidateTitle =
+    inferredYouTubeTrackTitle(item);
+
+  const candidateVariant =
+    ownershipVariantSignature(
+      item.title
     );
 
-  return library.some(
-    track => {
+  if (!candidateTitle) {
+    return false;
+  }
 
-      const artist =
-        normalizeDiscoveryText(
-          track.artist
-        );
+  return library.some(track => {
 
-      const title =
-        normalizeDiscoveryText(
-          track.title
-        );
-
-      if (
-        !title
-        ||
-        title.length < 4
-      ) {
-        return false;
-      }
-
-      if (
-        !videoText.includes(
-          title
-        )
-      ) {
-        return false;
-      }
-
-      // Title match alone is useful for DJ downloads with messy uploader names.
-      if (!artist) {
-        return true;
-      }
-
-      return (
-        videoText.includes(
-          artist
-        )
-        ||
-        normalizeArtistName(
-          item.discoveryArtist
-        )
-        ===
-        normalizeArtistName(
-          track.artist
-        )
+    const libraryArtist =
+      normalizeArtistName(
+        track.artist
       );
+
+    const libraryTitle =
+      normalizeTrackTitleForOwnership(
+        track.title
+      );
+
+    const libraryVariant =
+      ownershipVariantSignature(
+        track.title
+      );
+
+    if (!libraryTitle) {
+      return false;
     }
-  );
+
+    // Do not hide a remix/flip/VIP merely because the original is owned.
+    if (
+      candidateVariant
+      !==
+      libraryVariant
+      &&
+      (candidateVariant || libraryVariant)
+    ) {
+      return false;
+    }
+
+    const artistSimilarity =
+      tokenSimilarity(
+        candidateArtist,
+        libraryArtist
+      );
+
+    const titleSimilarity =
+      tokenSimilarity(
+        candidateTitle,
+        libraryTitle
+      );
+
+    const exactArtist =
+      candidateArtist
+      &&
+      libraryArtist
+      &&
+      (
+        candidateArtist === libraryArtist
+        ||
+        candidateArtist.includes(libraryArtist)
+        ||
+        libraryArtist.includes(candidateArtist)
+      );
+
+    const exactTitle =
+      candidateTitle === libraryTitle
+      ||
+      candidateTitle.includes(libraryTitle)
+      ||
+      libraryTitle.includes(candidateTitle);
+
+    if (
+      exactTitle
+      &&
+      (exactArtist || artistSimilarity >= 0.5)
+    ) {
+      return true;
+    }
+
+    // Messy DJ filenames and YouTube titles often differ by one or two tokens.
+    return (
+      titleSimilarity >= 0.82
+      &&
+      (
+        exactArtist
+        ||
+        artistSimilarity >= 0.6
+      )
+    );
+  });
 }
 
 
@@ -4866,63 +5058,76 @@ function diversifyDiscoveryResults(
   count
 ) {
 
-  const result = [];
-  const channels =
+  const groups =
     new Map();
 
-  const artists =
-    new Map();
-
-  for (const item of items) {
-
-    const channelKey =
-      normalizeDiscoveryText(
-        item.channelTitle
-      );
+  items.forEach(item => {
 
     const artistKey =
+      inferredYouTubeArtist(item)
+      ||
       normalizeArtistName(
         item.discoveryArtist
-      );
-
-    const channelCount =
-      channels.get(
-        channelKey
       )
       ||
-      0;
-
-    const artistCount =
-      artists.get(
-        artistKey
+      normalizeDiscoveryText(
+        item.channelTitle
       )
       ||
-      0;
+      item.videoId;
 
-    if (
-      channelCount >= 2
-      ||
-      artistCount >= 3
-    ) {
-      continue;
+    if (!groups.has(artistKey)) {
+      groups.set(artistKey,[]);
     }
 
-    result.push(item);
+    groups.get(artistKey).push(item);
+  });
 
-    channels.set(
-      channelKey,
-      channelCount + 1
-    );
-
-    artists.set(
+  const orderedGroups =
+    Array.from(
+      groups.entries()
+    )
+    .map(([artistKey,tracks]) => ({
       artistKey,
-      artistCount + 1
+      tracks:
+        tracks
+          .sort(
+            (a,b) => b.score - a.score
+          )
+          .slice(0,2)
+    }))
+    .sort(
+      (a,b) =>
+        (b.tracks[0]?.score || 0)
+        -
+        (a.tracks[0]?.score || 0)
     );
 
-    if (
-      result.length >= count
-    ) {
-      break;
+  const result = [];
+  const usedVideos = new Set();
+
+  // Round-robin pass: give every strong artist one slot before anyone gets a second.
+  for (let round = 0; round < 2; round++) {
+
+    for (const group of orderedGroups) {
+
+      const item =
+        group.tracks[round];
+
+      if (
+        !item
+        ||
+        usedVideos.has(item.videoId)
+      ) {
+        continue;
+      }
+
+      result.push(item);
+      usedVideos.add(item.videoId);
+
+      if (result.length >= count) {
+        return result;
+      }
     }
   }
 
@@ -5401,7 +5606,11 @@ async function discoverNewMusic() {
       +
       discoveryResults.length
       +
-      " YouTube recommendations based on artists you already download. Results use actual views and upload dates."
+      " YouTube recommendations across "
+      +
+      new Set(discoveryResults.map(item => inferredYouTubeArtist(item))).size
+      +
+      " artists. Library duplicates are fuzzy-matched before display."
     );
 
     renderDiscoveryResults(
